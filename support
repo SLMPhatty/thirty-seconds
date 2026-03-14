@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>thirty — Support</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    color: #333;
+    line-height: 1.7;
+    background: #fafafa;
+  }
+  h1 { font-size: 28px; margin-bottom: 8px; }
+  h2 { font-size: 18px; margin-top: 32px; }
+  p { margin: 12px 0; }
+  a { color: #555; }
+</style>
+</head>
+<body>
+  <h1>Support</h1>
+  <p>thirty is a simple breathing app. If you need help, you're in the right place.</p>
+
+  <h2>How do I use thirty?</h2>
+  <p>Open the app, tap "begin," and follow the circle. Breathe in as it expands, breathe out as it contracts. That's it.</p>
+
+  <h2>How do I restore my purchase?</h2>
+  <p>If you've previously unlocked thirty and need to restore your purchase (e.g., on a new device), tap "unlock" on the main screen, then tap "restore purchase." Your unlock will be restored through your Apple ID at no additional cost.</p>
+
+  <h2>What's included in the unlock?</h2>
+  <p>The one-time $2.99 unlock gives you:</p>
+  <ul>
+    <li>Unlimited sessions</li>
+    <li>All durations (30s, 1 min, 2 min, 5 min)</li>
+    <li>All ambient sounds (rain, brown noise, singing bowl)</li>
+    <li>Haptic feedback</li>
+    <li>Hide timer option</li>
+  </ul>
+  <p>There are no subscriptions. You pay once and it's yours forever.</p>
+
+  <h2>The app isn't working properly</h2>
+  <p>Try closing and reopening the app. If the issue persists, make sure you're running the latest version from the App Store. If that doesn't help, reach out to us below.</p>
+
+  <h2>Contact</h2>
+  <p>For any questions, issues, or feedback, email us at <a href="mailto:sethlouis@gmail.com">sethlouis@gmail.com</a>.</p>
+</body>
+</html>
