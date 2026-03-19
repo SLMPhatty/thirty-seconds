@@ -1,0 +1,48 @@
+APP STORE CONNECT — METADATA
+==============================
+
+App Name: thirty
+Subtitle: 30-Second Meditation Timer
+Category: Health & Fitness
+Subcategory: Mindfulness
+
+---
+
+DESCRIPTION:
+
+thirty is a meditation app that asks for just 30 seconds of your day.
+
+No courses. No subscriptions. No 10-step programs. Just one breath cycle, one moment of stillness, and you're done.
+
+Open the app. Tap begin. Follow the breathing circle. That's it.
+
+Features:
+- Guided breathing animation that expands and contracts with your breath
+- Optional ocean wave sounds that sync to your inhales and exhales
+- Daily streak tracking to build a consistent practice
+- Minimalist dark interface designed for calm
+
+Try 3 free sessions. Unlock unlimited sessions and longer durations (60s, 90s) with a single $2.99 purchase — no subscriptions, ever.
+
+Sometimes thirty seconds is all you need.
+
+---
+
+KEYWORDS (100 char max):
+meditation,breathe,mindfulness,calm,relax,breathing,30 seconds,quick,simple,stillness
+
+---
+
+WHAT'S NEW (Version 1.0):
+Your first breath. Welcome to thirty.
+
+---
+
+PROMOTIONAL TEXT (can be updated without new build):
+One breath. Thirty seconds. That's all.
+
+---
+
+SUPPORT URL: (use your email or a simple contact page)
+MARKETING URL: (optional)
+PRIVACY POLICY URL: (host privacy-policy.html and paste URL here)

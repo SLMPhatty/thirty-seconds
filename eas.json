@@ -1,0 +1,26 @@
+{
+  "cli": {
+    "version": ">= 18.0.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal"
+    },
+    "production": {
+      "distribution": "store"
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "sethlouis@gmail.com",
+        "appleTeamId": "B2MV35NY53",
+        "ascAppId": "6760586218"
+      }
+    }
+  }
+}
