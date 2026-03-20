@@ -31,9 +31,10 @@ const CROSSFADE_DURATION = 4000;
 interface Props {
   prefs: Prefs;
   onFinish: () => void;
+  onVisualStateChange?: (phase: BreathPhase, duration: number) => void;
 }
 
-export function BreathScreen({ prefs, onFinish }: Props) {
+export function BreathScreen({ prefs, onFinish, onVisualStateChange }: Props) {
   const showPatternPicker = prefs.duration >= 60;
   const [selectedPattern, setSelectedPattern] = useState<BreathPattern>(
     showPatternPicker ? prefs.breathPattern : DEFAULT_BREATH_PATTERN
@@ -49,6 +50,7 @@ export function BreathScreen({ prefs, onFinish }: Props) {
   const [phaseIndex, setPhaseIndex] = useState(0);
   const [ready, setReady] = useState(false);
   const [countdown, setCountdown] = useState(3);
+  const [awaitingFinalExhale, setAwaitingFinalExhale] = useState(false);
   const { playAsset, playLoop, stopAll } = useAudio();
   const ambientARef = useRef<Audio.Sound | null>(null);
   const ambientBRef = useRef<Audio.Sound | null>(null);
@@ -109,22 +111,44 @@ export function BreathScreen({ prefs, onFinish }: Props) {
     return () => clearInterval(t);
   }, []);
 
+  const completeSession = useCallback(() => {
+    if (finished.current) return;
+    finished.current = true;
+    playAsset(chimeSound, 0.5);
+
+    if (ambientARef.current || ambientBRef.current) {
+      const startTime = performance.now();
+      const startVol = sessionVolRef.current;
+      const fadeOut = () => {
+        const t = Math.min((performance.now() - startTime) / FADE_DURATION, 1);
+        sessionVolRef.current = startVol * (1 - t);
+        if (t < 1) rafRef.current = requestAnimationFrame(fadeOut);
+      };
+      rafRef.current = requestAnimationFrame(fadeOut);
+    }
+
+    setTimeout(() => {
+      cleanup();
+      onFinish();
+    }, 2500);
+  }, [onFinish, playAsset]);
+
   const advancePhase = useCallback(() => {
+    if (awaitingFinalExhale && currentPhase.phase === 'out') {
+      completeSession();
+      return;
+    }
+
     setPhaseIndex((prev) => {
       const next = (prev + 1) % PHASES.length;
-      const nextPhase = PHASES[next];
-
-      if (prefs.haptics) {
-        if (nextPhase.phase === 'in') {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        } else if (nextPhase.phase === 'out') {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
-        }
-      }
-
       return next;
     });
-  }, [prefs.haptics, PHASES]);
+  }, [PHASES.length, awaitingFinalExhale, completeSession, currentPhase.phase]);
+
+  useEffect(() => {
+    if (!ready || !prefs.haptics || currentPhase.phase !== 'in') return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }, [currentPhase.phase, phaseIndex, prefs.haptics, ready]);
 
   // Phase cycling — only when ready
   useEffect(() => {
@@ -134,6 +158,10 @@ export function BreathScreen({ prefs, onFinish }: Props) {
       if (phaseTimeout.current) clearTimeout(phaseTimeout.current);
     };
   }, [ready, phaseIndex, advancePhase, currentPhase.duration]);
+
+  useEffect(() => {
+    onVisualStateChange?.(ready ? (currentPhase.phase as BreathPhase) : 'ready', ready ? currentPhase.duration : READY_DELAY);
+  }, [currentPhase.duration, currentPhase.phase, onVisualStateChange, ready]);
 
   // Fade ambient sound in when session starts + crossfade polling
   useEffect(() => {
@@ -213,24 +241,11 @@ export function BreathScreen({ prefs, onFinish }: Props) {
     timerInterval.current = setInterval(() => {
       setSeconds((prev) => {
         if (prev <= 1) {
-          if (!finished.current) {
-            finished.current = true;
-            playAsset(chimeSound, 0.5);
-            if (ambientARef.current || ambientBRef.current) {
-              const startTime = performance.now();
-              const startVol = sessionVolRef.current;
-              const fadeOut = () => {
-                const t = Math.min((performance.now() - startTime) / FADE_DURATION, 1);
-                sessionVolRef.current = startVol * (1 - t);
-                if (t < 1) rafRef.current = requestAnimationFrame(fadeOut);
-              };
-              rafRef.current = requestAnimationFrame(fadeOut);
-            }
-            setTimeout(() => {
-              cleanup();
-              onFinish();
-            }, 2500);
+          if (timerInterval.current) {
+            clearInterval(timerInterval.current);
+            timerInterval.current = null;
           }
+          setAwaitingFinalExhale(true);
           return 0;
         }
         return prev - 1;
@@ -248,8 +263,15 @@ export function BreathScreen({ prefs, onFinish }: Props) {
     stopAll();
   };
 
+  useEffect(() => {
+    return () => {
+      onVisualStateChange?.('ready', READY_DELAY);
+    };
+  }, [onVisualStateChange]);
+
   // Determine if current hold is after inhale
   const holdAfterInhale = currentPhase.phase === 'hold' && phaseIndex > 0 && PHASES[phaseIndex - 1].phase === 'in';
+  const isFinalExhale = awaitingFinalExhale && currentPhase.phase === 'out';
 
   const handlePatternSelect = useCallback(async (patternKey: BreathPattern) => {
     if (!showPatternPicker || selectedPattern === patternKey) return;
@@ -297,6 +319,7 @@ export function BreathScreen({ prefs, onFinish }: Props) {
         seconds={ready ? seconds : prefs.duration || 30}
         hideTimer={prefs.hideTimer}
         breathWord={ready ? currentPhase.label : String(countdown)}
+        isFinalExhale={isFinalExhale}
         phases={PHASES}
         holdAfterInhale={holdAfterInhale}
       />

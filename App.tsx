@@ -27,6 +27,8 @@ const REMINDER_HOURS: Record<string, number> = { morning: 8, afternoon: 13, even
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('start');
+  const [breathPhase, setBreathPhase] = useState<'in' | 'hold' | 'out' | 'ready'>('ready');
+  const [phaseDuration, setPhaseDuration] = useState(3000);
   const [prefs, setLocalPrefs] = useState<Prefs>({
     ambientSound: 'rain',
     hideTimer: false,
@@ -65,6 +67,13 @@ export default function App() {
       await refreshStreakProtection();
     })();
   }, [refreshStreakProtection]);
+
+  useEffect(() => {
+    if (screen !== 'breath') {
+      setBreathPhase('ready');
+      setPhaseDuration(3000);
+    }
+  }, [screen]);
 
   const onLayoutRootView = useCallback(async () => {
     if (fontsLoaded) {
@@ -112,7 +121,7 @@ export default function App() {
   return (
     <View style={styles.container} onLayout={onLayoutRootView}>
       <StatusBar style="light" />
-      <BackgroundOrbs breathing={screen === 'breath'} />
+      <BackgroundOrbs breathPhase={screen === 'breath' ? breathPhase : 'ready'} phaseDuration={phaseDuration} />
 
       {screen === 'onboarding' && (
         <OnboardingScreen onComplete={handleOnboardingComplete} />
@@ -125,7 +134,14 @@ export default function App() {
         />
       )}
       {screen === 'breath' && (
-        <BreathScreen prefs={prefs} onFinish={handleFinish} />
+        <BreathScreen
+          prefs={prefs}
+          onFinish={handleFinish}
+          onVisualStateChange={(phase, duration) => {
+            setBreathPhase(phase);
+            setPhaseDuration(duration);
+          }}
+        />
       )}
       {screen === 'afterglow' && (
         <AfterglowScreen onComplete={() => setScreen('done')} />

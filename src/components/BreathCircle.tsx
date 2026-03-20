@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, {
+  interpolateColor,
   useSharedValue,
   useAnimatedStyle,
   withTiming,
@@ -19,15 +20,27 @@ interface Props {
   seconds: number;
   hideTimer: boolean;
   breathWord: string;
+  isFinalExhale: boolean;
   phases: PhaseConfig[];
   holdAfterInhale?: boolean; // true if this hold follows an inhale (circle stays expanded)
 }
 
 const SIZE = 220;
 
-export function BreathCircle({ phase, phaseDuration, seconds, hideTimer, breathWord, phases, holdAfterInhale }: Props) {
+export function BreathCircle({
+  phase,
+  phaseDuration,
+  seconds,
+  hideTimer,
+  breathWord,
+  isFinalExhale,
+  phases,
+  holdAfterInhale,
+}: Props) {
   const scale = useSharedValue(0.6);
   const pulseScale = useSharedValue(1);
+  const wordOpacity = useSharedValue(1);
+  const finalExhaleProgress = useSharedValue(0);
   const started = useRef(false);
   const lastPhasesKey = useRef('');
 
@@ -81,8 +94,37 @@ export function BreathCircle({ phase, phaseDuration, seconds, hideTimer, breathW
     }
   }, [phase]);
 
+  useEffect(() => {
+    wordOpacity.value = 0;
+    wordOpacity.value = withTiming(1, { duration: 400, easing: Easing.out(Easing.ease) });
+  }, [breathWord, wordOpacity]);
+
+  useEffect(() => {
+    finalExhaleProgress.value = withTiming(isFinalExhale ? 1 : 0, {
+      duration: Math.min(phaseDuration, 1000),
+      easing: Easing.inOut(Easing.ease),
+    });
+  }, [finalExhaleProgress, isFinalExhale, phaseDuration]);
+
   const circleStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value * pulseScale.value }],
+  }));
+
+  const finalExhaleStyle = useAnimatedStyle(() => ({
+    borderColor: interpolateColor(
+      finalExhaleProgress.value,
+      [0, 1],
+      [phase === 'out' ? 'rgba(232, 228, 223, 0.08)' : phase === 'hold' ? 'rgba(240, 200, 150, 0.2)' : 'rgba(232, 228, 223, 0.18)', 'rgba(240, 200, 150, 0.38)']
+    ),
+    backgroundColor: interpolateColor(
+      finalExhaleProgress.value,
+      [0, 1],
+      [phase === 'out' ? 'rgba(165, 148, 249, 0.03)' : phase === 'hold' ? 'rgba(240, 200, 150, 0.06)' : 'rgba(165, 148, 249, 0.08)', 'rgba(240, 200, 150, 0.14)']
+    ),
+  }));
+
+  const wordStyle = useAnimatedStyle(() => ({
+    opacity: wordOpacity.value,
   }));
 
   const circlePhaseStyle =
@@ -95,12 +137,12 @@ export function BreathCircle({ phase, phaseDuration, seconds, hideTimer, breathW
   return (
     <View style={styles.wrap}>
       <Animated.View
-        style={[styles.circle, circlePhaseStyle, circleStyle]}
+        style={[styles.circle, circlePhaseStyle, circleStyle, finalExhaleStyle]}
       />
       {!hideTimer && (
         <Text style={styles.timer}>{seconds > 0 ? seconds : ''}</Text>
       )}
-      <Text style={styles.word}>{breathWord}</Text>
+      <Animated.Text style={[styles.word, wordStyle]}>{breathWord}</Animated.Text>
     </View>
   );
 }
