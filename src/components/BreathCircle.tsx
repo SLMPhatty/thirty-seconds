@@ -41,6 +41,8 @@ export function BreathCircle({
   const pulseScale = useSharedValue(1);
   const wordOpacity = useSharedValue(1);
   const finalExhaleProgress = useSharedValue(0);
+  // 0 = exhale colors, 1 = inhale colors, 0.5 = hold colors
+  const colorPhase = useSharedValue(0);
   const started = useRef(false);
   const lastPhasesKey = useRef('');
 
@@ -99,6 +101,17 @@ export function BreathCircle({
     wordOpacity.value = withTiming(1, { duration: 400, easing: Easing.out(Easing.ease) });
   }, [breathWord, wordOpacity]);
 
+  // Animate color phase: gradual crossfade between inhale/exhale/hold colors
+  useEffect(() => {
+    if (phase === 'in' || phase === 'ready') {
+      colorPhase.value = withTiming(1, { duration: phaseDuration * 0.4, easing: Easing.inOut(Easing.ease) });
+    } else if (phase === 'out') {
+      colorPhase.value = withTiming(0, { duration: phaseDuration * 0.4, easing: Easing.inOut(Easing.ease) });
+    } else if (phase === 'hold') {
+      colorPhase.value = withTiming(0.5, { duration: 800, easing: Easing.inOut(Easing.ease) });
+    }
+  }, [phase, phaseDuration, colorPhase]);
+
   useEffect(() => {
     finalExhaleProgress.value = withTiming(isFinalExhale ? 1 : 0, {
       duration: Math.min(phaseDuration, 1000),
@@ -110,34 +123,38 @@ export function BreathCircle({
     transform: [{ scale: scale.value * pulseScale.value }],
   }));
 
-  const finalExhaleStyle = useAnimatedStyle(() => ({
-    borderColor: interpolateColor(
-      finalExhaleProgress.value,
-      [0, 1],
-      [phase === 'out' ? 'rgba(232, 228, 223, 0.08)' : phase === 'hold' ? 'rgba(240, 200, 150, 0.2)' : 'rgba(232, 228, 223, 0.18)', 'rgba(240, 200, 150, 0.38)']
-    ),
-    backgroundColor: interpolateColor(
-      finalExhaleProgress.value,
-      [0, 1],
-      [phase === 'out' ? 'rgba(165, 148, 249, 0.03)' : phase === 'hold' ? 'rgba(240, 200, 150, 0.06)' : 'rgba(165, 148, 249, 0.08)', 'rgba(240, 200, 150, 0.14)']
-    ),
-  }));
+  // Smooth color crossfade — no more snapping
+  const colorStyle = useAnimatedStyle(() => {
+    const fe = finalExhaleProgress.value;
+    const cp = colorPhase.value;
+
+    // Base colors: interpolate between exhale (0) → hold (0.5) → inhale (1)
+    const baseBorder = interpolateColor(
+      cp,
+      [0, 0.5, 1],
+      ['rgba(232, 228, 223, 0.08)', 'rgba(240, 200, 150, 0.2)', 'rgba(232, 228, 223, 0.18)']
+    );
+    const baseBg = interpolateColor(
+      cp,
+      [0, 0.5, 1],
+      ['rgba(165, 148, 249, 0.03)', 'rgba(240, 200, 150, 0.06)', 'rgba(165, 148, 249, 0.08)']
+    );
+
+    // Final exhale: crossfade to golden
+    const borderColor = interpolateColor(fe, [0, 1], [baseBorder as string, 'rgba(240, 200, 150, 0.38)']);
+    const backgroundColor = interpolateColor(fe, [0, 1], [baseBg as string, 'rgba(240, 200, 150, 0.14)']);
+
+    return { borderColor, backgroundColor };
+  });
 
   const wordStyle = useAnimatedStyle(() => ({
     opacity: wordOpacity.value,
   }));
 
-  const circlePhaseStyle =
-    phase === 'in' || phase === 'ready'
-      ? styles.circleInhale
-      : phase === 'hold'
-        ? styles.circleHold
-        : styles.circleExhale;
-
   return (
     <View style={styles.wrap}>
       <Animated.View
-        style={[styles.circle, circlePhaseStyle, circleStyle, finalExhaleStyle]}
+        style={[styles.circle, circleStyle, colorStyle]}
       />
       {!hideTimer && (
         <Text style={styles.timer}>{seconds > 0 ? seconds : ''}</Text>
