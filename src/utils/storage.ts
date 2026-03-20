@@ -113,13 +113,18 @@ export async function getSessionsToday(): Promise<number> {
 }
 
 export async function isUnlocked(): Promise<boolean> {
+  if (DEV_UNLOCKED) return true;
   const d = await getData();
   return d.unlocked === true;
 }
 
 const FREE_SESSIONS = 3;
 
+// Dev mode — set to true to bypass purchase lock during development
+const DEV_UNLOCKED = __DEV__;
+
 export async function canPlay(): Promise<boolean> {
+  if (DEV_UNLOCKED) return true;
   const d = await getData();
   return d.unlocked || d.totalSessions < FREE_SESSIONS;
 }
