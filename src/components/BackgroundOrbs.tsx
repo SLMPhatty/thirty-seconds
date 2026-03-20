@@ -75,10 +75,30 @@ export function BackgroundOrbs({ breathPhase = 'ready', phaseDuration = 3000, ph
   useEffect(() => {
     if (breathPhase === 'ready') {
       cancelAnimation(holdPulse);
-      groupScale.value = withTiming(1, { duration: 1600, easing: Easing.inOut(Easing.ease) });
-      orbOpacity.value = withTiming(0.4, { duration: 1600, easing: Easing.inOut(Easing.ease) });
-      radialStrength.value = withTiming(0.16, { duration: 1600, easing: Easing.inOut(Easing.ease) });
-      screenPulseOpacity.value = withTiming(0, { duration: 1600, easing: Easing.inOut(Easing.ease) });
+      holdPulse.value = withTiming(0, { duration: 300 });
+      // Gentle alive breathing on home screen — slow, organic pulse
+      groupScale.value = withRepeat(
+        withSequence(
+          withTiming(1.08, { duration: 4000, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0.95, { duration: 4000, easing: Easing.inOut(Easing.ease) }),
+        ),
+        -1, false
+      );
+      orbOpacity.value = withRepeat(
+        withSequence(
+          withTiming(0.55, { duration: 4000, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0.3, { duration: 4000, easing: Easing.inOut(Easing.ease) }),
+        ),
+        -1, false
+      );
+      radialStrength.value = withRepeat(
+        withSequence(
+          withTiming(0.22, { duration: 4000, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0.12, { duration: 4000, easing: Easing.inOut(Easing.ease) }),
+        ),
+        -1, false
+      );
+      screenPulseOpacity.value = withTiming(0, { duration: 800, easing: Easing.inOut(Easing.ease) });
       return;
     }
 
