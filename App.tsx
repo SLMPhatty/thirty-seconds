@@ -122,7 +122,7 @@ export default function App() {
   return (
     <View style={styles.container} onLayout={onLayoutRootView}>
       <StatusBar style="light" />
-      <BackgroundOrbs breathPhase={screen === 'breath' ? breathPhase : 'ready'} phaseDuration={phaseDuration} phaseCounter={phaseCounter} />
+      <BackgroundOrbs />
 
       {screen === 'onboarding' && (
         <OnboardingScreen onComplete={handleOnboardingComplete} />
