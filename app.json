@@ -17,8 +17,6 @@
       "bundleIdentifier": "com.thirty.app",
       "appleTeamId": "B2MV35NY53",
       "entitlements": {
-        "com.apple.developer.healthkit": true,
-        "com.apple.developer.healthkit.access": ["HKCategoryTypeIdentifierMindfulSession"],
         "com.apple.security.application-groups": ["group.com.thirty.app"]
       },
       "infoPlist": {
