@@ -1,4 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  BreathPattern,
+  DEFAULT_BREATH_PATTERN,
+} from '../data/breathingPatterns';
 
 const STORE_KEY = 'thirty-v1';
 const PREFS_KEY = 'thirty-prefs';
@@ -24,6 +28,7 @@ export interface Prefs {
   hideTimer: boolean;
   haptics: boolean;
   duration: number;
+  breathPattern: BreathPattern;
   reminderTime: 'morning' | 'afternoon' | 'evening' | 'off';
   onboardingSeen: boolean;
 }
@@ -42,6 +47,7 @@ const defaultPrefs: Prefs = {
   hideTimer: false,
   haptics: true,
   duration: 30,
+  breathPattern: DEFAULT_BREATH_PATTERN,
   reminderTime: 'off',
   onboardingSeen: false,
 };
@@ -81,8 +87,10 @@ export async function getPrefs(): Promise<Prefs> {
       delete parsed.waves;
     }
     // Remove deprecated fields
-    delete parsed.breathPattern;
     delete parsed.waves;
+    if (parsed.breathPattern === 'calm') {
+      parsed.breathPattern = DEFAULT_BREATH_PATTERN;
+    }
     return { ...defaultPrefs, ...parsed };
   } catch {
     return { ...defaultPrefs };
@@ -126,14 +134,16 @@ export async function isPremiumFeature(feature: 'haptics' | 'duration'): Promise
   return await isUnlocked();
 }
 
-export const MILESTONES = [7, 30, 60, 100, 365];
+export const MILESTONES = [7, 14, 30, 60, 90, 180, 365];
 
 export function getMilestoneMessage(streak: number): string | null {
   const messages: Record<number, string> = {
     7: 'one week of showing up',
+    14: 'two weeks. the ritual is taking hold',
     30: 'a whole month of stillness',
     60: 'sixty days — this is who you are now',
-    100: 'one hundred days. remarkable.',
+    90: 'ninety days of returning to yourself',
+    180: 'six months of steady presence',
     365: 'one year. you changed your life.',
   };
   return messages[streak] || null;
@@ -212,6 +222,11 @@ export async function getSessionStats(): Promise<SessionStats> {
     longestStreak: Math.max(longest, d.streak),
     weekDays,
   };
+}
+
+export async function hasPracticedToday(): Promise<boolean> {
+  const d = await getData();
+  return d.lastDate === today();
 }
 
 export async function unlock(): Promise<void> {

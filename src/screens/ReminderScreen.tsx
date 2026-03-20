@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { colors } from '../theme';
-import { getPrefs, setPrefs } from '../utils/storage';
+import { getPrefs, setPrefs, getStreak } from '../utils/storage';
 
 interface Props {
   onDone: () => void;
@@ -15,18 +15,34 @@ const options = [
   { label: 'no thanks', hour: -1 },
 ] as const;
 
-async function scheduleDailyReminder(hour: number) {
-  await Notifications.cancelAllScheduledNotificationsAsync();
+const DAILY_REMINDER_KIND = 'daily-reminder';
+
+async function cancelNotificationsByKind(kind: string) {
+  const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+  await Promise.all(
+    scheduled
+      .filter((notification) => notification.content.data?.kind === kind)
+      .map((notification) => Notifications.cancelScheduledNotificationAsync(notification.identifier))
+  );
+}
+
+export async function scheduleDailyReminder(hour: number, streak?: number) {
+  await cancelNotificationsByKind(DAILY_REMINDER_KIND);
   if (hour < 0) return;
 
   const { status } = await Notifications.requestPermissionsAsync();
   if (status !== 'granted') return;
 
+  const body = streak && streak > 0
+    ? `Don\u2019t break your ${streak}-day streak \u2014 30 seconds is all it takes`
+    : 'Start your streak \u2014 just 30 seconds';
+
   await Notifications.scheduleNotificationAsync({
     content: {
       title: 'thirty',
-      body: 'your 30 seconds of stillness awaits.',
+      body,
       sound: true,
+      data: { kind: DAILY_REMINDER_KIND },
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.DAILY,
@@ -41,10 +57,10 @@ export function ReminderScreen({ onDone }: Props) {
 
   const handleSelect = async (label: string, hour: number) => {
     setSelected(label);
-    const time = hour < 0 ? 'off' : label;
-    await scheduleDailyReminder(hour);
+    const streak = await getStreak();
+    await scheduleDailyReminder(hour, streak);
     const prefs = await getPrefs();
-    await setPrefs({ ...prefs, reminderTime: time as any });
+    await setPrefs({ ...prefs, reminderTime: (hour < 0 ? 'off' : label) as any });
     setTimeout(onDone, 400);
   };
 

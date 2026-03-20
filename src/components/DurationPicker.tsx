@@ -8,7 +8,12 @@ interface Props {
   onSelect: (dur: number) => void;
 }
 
-const durations = [30, 60, 90];
+const durations = [30, 60, 120, 300, 600, 900];
+
+function formatDuration(s: number): string {
+  if (s < 60) return `${s}s`;
+  return `${s / 60}m`;
+}
 
 export function DurationPicker({ selected, unlocked, onSelect }: Props) {
   return (
@@ -30,7 +35,7 @@ export function DurationPicker({ selected, unlocked, onSelect }: Props) {
             activeOpacity={0.7}
           >
             <Text style={[styles.label, isActive && styles.labelActive]}>
-              {dur}s{isLocked ? ' \u{1F512}' : ''}
+              {formatDuration(dur)}{isLocked ? ' \u{1F512}' : ''}
             </Text>
           </TouchableOpacity>
         );
@@ -49,7 +54,7 @@ const styles = StyleSheet.create({
   },
   btn: {
     paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     backgroundColor: 'rgba(232, 228, 223, 0.02)',
   },
   btnBorder: {

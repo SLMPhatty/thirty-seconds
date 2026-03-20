@@ -42,7 +42,7 @@ export function UnlockScreen({ onBack, onUnlocked }: Props) {
         </TouchableOpacity>
       )}
 
-      <Text style={styles.price}>$3 — one time, forever</Text>
+      <Text style={styles.price}>$4.99 — one time, forever</Text>
 
       <TouchableOpacity onPress={handleRestore} activeOpacity={0.7}>
         <Text style={styles.restoreText}>restore purchase</Text>

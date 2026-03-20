@@ -72,6 +72,10 @@ export function BackgroundOrbs({ breathing = false }: { breathing?: boolean }) {
 
   return (
     <View style={styles.container} pointerEvents="none">
+      {/* Radial purple fade from top */}
+      <View style={styles.radialFade} />
+      {/* Warm accent glow */}
+      <View style={styles.warmGlow} />
       <Animated.View
         style={[styles.orb, styles.orb1, { opacity: breathing ? 0.7 : 0.4 }, style1]}
       />
@@ -94,6 +98,24 @@ const styles = StyleSheet.create({
   orb: {
     position: 'absolute',
     borderRadius: 999,
+  },
+  radialFade: {
+    position: 'absolute',
+    top: '-20%',
+    left: '-30%',
+    width: '160%',
+    height: '60%',
+    borderRadius: 999,
+    backgroundColor: 'rgba(165, 148, 249, 0.16)',
+  },
+  warmGlow: {
+    position: 'absolute',
+    top: '10%',
+    right: '-10%',
+    width: '50%',
+    height: '30%',
+    borderRadius: 999,
+    backgroundColor: 'rgba(240, 200, 150, 0.08)',
   },
   orb1: {
     width: 500,

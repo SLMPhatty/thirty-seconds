@@ -9,15 +9,21 @@ import { StartScreen } from './src/screens/StartScreen';
 import { BreathScreen } from './src/screens/BreathScreen';
 import { DoneScreen } from './src/screens/DoneScreen';
 import { UnlockScreen } from './src/screens/UnlockScreen';
-import { ReminderScreen } from './src/screens/ReminderScreen';
+import { ReminderScreen, scheduleDailyReminder } from './src/screens/ReminderScreen';
 import { HistoryScreen } from './src/screens/HistoryScreen';
 import { AfterglowScreen } from './src/screens/AfterglowScreen';
-import { recordSession, getPrefs, setPrefs as savePrefs, Prefs } from './src/utils/storage';
+import { recordSession, getPrefs, setPrefs as savePrefs, getStreak, Prefs } from './src/utils/storage';
+import { DEFAULT_BREATH_PATTERN } from './src/data/breathingPatterns';
+import { useHealthKit } from './src/hooks/useHealthKit';
+import { useStreakProtection } from './src/hooks/useStreakProtection';
+import { updateWidget } from './src/utils/widget';
 import { colors } from './src/theme';
 
 SplashScreen.preventAutoHideAsync();
 
 type Screen = 'onboarding' | 'start' | 'breath' | 'afterglow' | 'done' | 'reminder' | 'unlock' | 'history';
+
+const REMINDER_HOURS: Record<string, number> = { morning: 8, afternoon: 13, evening: 20 };
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('start');
@@ -26,10 +32,13 @@ export default function App() {
     hideTimer: false,
     haptics: true,
     duration: 30,
+    breathPattern: DEFAULT_BREATH_PATTERN,
     reminderTime: 'off',
     onboardingSeen: false,
   });
   const [firstSession, setFirstSession] = useState(true);
+  const { logSessionToHealthKit } = useHealthKit();
+  const { refreshStreakProtection } = useStreakProtection();
 
   const [fontsLoaded] = useFonts({
     InstrumentSerif: require('./assets/fonts/InstrumentSerif-Regular.ttf'),
@@ -46,9 +55,16 @@ export default function App() {
       }
       if (p.reminderTime !== 'off') {
         setFirstSession(false);
+        // Re-schedule notification with current streak on each app launch
+        const hour = REMINDER_HOURS[p.reminderTime];
+        if (hour) {
+          const streak = await getStreak();
+          scheduleDailyReminder(hour, streak);
+        }
       }
+      await refreshStreakProtection();
     })();
-  }, []);
+  }, [refreshStreakProtection]);
 
   const onLayoutRootView = useCallback(async () => {
     if (fontsLoaded) {
@@ -72,6 +88,16 @@ export default function App() {
 
   const handleFinish = async () => {
     await recordSession(prefs.duration);
+    await logSessionToHealthKit(prefs.duration);
+    const streak = await getStreak();
+    await updateWidget(streak);
+    if (prefs.reminderTime !== 'off') {
+      const hour = REMINDER_HOURS[prefs.reminderTime];
+      if (hour) {
+        await scheduleDailyReminder(hour, streak);
+      }
+    }
+    await refreshStreakProtection();
     setScreen('afterglow');
   };
 

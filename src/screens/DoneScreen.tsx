@@ -1,13 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Share } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 import { colors } from '../theme';
 import { getQuote } from '../utils/quotes';
-import { getData, isUnlocked as checkUnlocked, getMilestoneMessage, getFreeSessions } from '../utils/storage';
+import { getData, isUnlocked as checkUnlocked, getMilestoneMessage, getFreeSessions, MILESTONES } from '../utils/storage';
 
 interface Props {
   onAgain: () => void;
   onUnlock: () => void;
+}
+
+async function celebrationHaptic() {
+  await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  await new Promise((r) => setTimeout(r, 80));
+  await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+  await new Promise((r) => setTimeout(r, 110));
+  await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 }
 
 export function DoneScreen({ onAgain, onUnlock }: Props) {
@@ -23,8 +32,14 @@ export function DoneScreen({ onAgain, onUnlock }: Props) {
       setQuote(getQuote(d.totalSessions));
       setStreak(d.streak);
       setUnlocked(await checkUnlocked());
-      setMilestone(getMilestoneMessage(d.streak));
+      const msg = getMilestoneMessage(d.streak);
+      setMilestone(msg);
       setFreeLeft(await getFreeSessions());
+
+      // Celebration haptic on milestone
+      if (MILESTONES.includes(d.streak)) {
+        celebrationHaptic();
+      }
     })();
   }, []);
 
@@ -43,9 +58,14 @@ export function DoneScreen({ onAgain, onUnlock }: Props) {
       <View style={styles.streakWrap}>
         <Text style={[styles.streakNum, milestone && styles.streakNumMilestone]}>{streak}</Text>
         {milestone ? (
-          <Animated.Text entering={FadeIn.duration(800)} style={styles.milestoneText}>
-            {milestone}
-          </Animated.Text>
+          <>
+            <Animated.Text entering={FadeIn.duration(800)} style={styles.milestoneText}>
+              milestone reached
+            </Animated.Text>
+            <Animated.Text entering={FadeIn.duration(900)} style={styles.milestoneSubtext}>
+              {milestone}
+            </Animated.Text>
+          </>
         ) : (
           <Text style={styles.streakLabel}>day streak</Text>
         )}
@@ -71,7 +91,7 @@ export function DoneScreen({ onAgain, onUnlock }: Props) {
             <Text style={styles.freeCount}>no free sessions left {' · '}</Text>
           )}
           <Text style={styles.supportLinkText} onPress={onUnlock}>
-            unlock unlimited — $3
+            unlock unlimited — $4.99
           </Text>
         </Text>
       )}
@@ -124,9 +144,18 @@ const styles = StyleSheet.create({
   milestoneText: {
     fontSize: 14,
     color: colors.accent,
-    fontFamily: 'DMSans',
+    fontFamily: 'DMSans_500Medium',
     textAlign: 'center',
     marginTop: 4,
+    textTransform: 'lowercase',
+    letterSpacing: 0.5,
+  },
+  milestoneSubtext: {
+    fontSize: 14,
+    color: colors.accent,
+    fontFamily: 'DMSans',
+    textAlign: 'center',
+    opacity: 0.88,
   },
   actions: {
     flexDirection: 'row',

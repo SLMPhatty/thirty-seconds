@@ -15,14 +15,24 @@ import {
   isUnlocked as checkUnlocked,
   canPlay,
   getFreeSessions,
+  hasPracticedToday,
   Prefs,
   AmbientSound,
 } from '../utils/storage';
+import { DEFAULT_BREATH_PATTERN } from '../data/breathingPatterns';
 
 interface Props {
   onBegin: (prefs: Prefs) => void;
   onUnlock: () => void;
   onHistory: () => void;
+}
+
+function getGreeting(): string {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12) return 'good morning';
+  if (h >= 12 && h < 17) return 'good afternoon';
+  if (h >= 17 && h < 21) return 'good evening';
+  return 'good night';
 }
 
 export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
@@ -31,6 +41,7 @@ export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
     hideTimer: false,
     haptics: true,
     duration: 30,
+    breathPattern: DEFAULT_BREATH_PATTERN,
     reminderTime: 'off',
     onboardingSeen: true,
   });
@@ -38,20 +49,23 @@ export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
   const [unlocked, setUnlocked] = useState(false);
   const [playable, setPlayable] = useState(true);
   const [freeLeft, setFreeLeft] = useState(3);
+  const [practicedToday, setPracticedToday] = useState(true);
 
   const loadState = useCallback(async () => {
-    const [p, s, u, cp, fl] = await Promise.all([
+    const [p, s, u, cp, fl, pt] = await Promise.all([
       getPrefs(),
       getStreak(),
       checkUnlocked(),
       canPlay(),
       getFreeSessions(),
+      hasPracticedToday(),
     ]);
     setLocalPrefs(p);
     setStreak(s);
     setUnlocked(u);
     setPlayable(cp);
     setFreeLeft(fl);
+    setPracticedToday(pt);
   }, []);
 
   useEffect(() => {
@@ -59,7 +73,6 @@ export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
   }, [loadState]);
 
   const togglePref = async (key: keyof Prefs) => {
-    // Premium features require unlock
     if ((key === 'haptics' || key === 'hideTimer') && !prefs[key] && !unlocked) {
       onUnlock();
       return;
@@ -74,7 +87,11 @@ export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
       onUnlock();
       return;
     }
-    const updated = { ...prefs, duration: dur };
+    const updated = {
+      ...prefs,
+      duration: dur,
+      breathPattern: dur < 60 ? DEFAULT_BREATH_PATTERN : prefs.breathPattern,
+    };
     setLocalPrefs(updated);
     await setPrefs(updated);
   };
@@ -97,8 +114,11 @@ export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
     onBegin(prefs);
   };
 
+  const isStreakAtRisk = streak > 0 && !practicedToday && new Date().getHours() >= 18;
+
   return (
     <View style={styles.container}>
+      <Text style={styles.greeting}>{getGreeting()}</Text>
       <Text style={styles.brand}>thirty</Text>
       <Text style={styles.tagline}>30 seconds of stillness</Text>
 
@@ -146,6 +166,9 @@ export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
         <TouchableOpacity style={styles.streakRow} onPress={onHistory} activeOpacity={0.7}>
           <Text style={styles.streakNum}>{streak}</Text>
           <Text style={styles.streakLabel}> day streak ›</Text>
+          {isStreakAtRisk && (
+            <Text style={styles.streakAtRisk}>  at risk</Text>
+          )}
         </TouchableOpacity>
       )}
 
@@ -157,7 +180,7 @@ export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
           }
           {'\n'}
           <Text style={styles.limitLink} onPress={onUnlock}>
-            unlock unlimited — $3 once →
+            unlock unlimited — $4.99 once →
           </Text>
         </Text>
       )}
@@ -171,6 +194,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,
+  },
+  greeting: {
+    fontSize: 13,
+    color: colors.textFaint,
+    fontFamily: 'DMSans',
+    marginBottom: 6,
+    textTransform: 'lowercase',
   },
   brand: {
     fontFamily: 'InstrumentSerif',
@@ -249,6 +279,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textFaint,
     fontFamily: 'DMSans',
+  },
+  streakAtRisk: {
+    fontSize: 12,
+    color: colors.warm,
+    fontFamily: 'DMSans',
+    opacity: 0.8,
   },
   limitNote: {
     marginTop: 16,

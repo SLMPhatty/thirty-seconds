@@ -1,10 +1,17 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
 import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
 import { BreathCircle, BreathPhase } from '../components/BreathCircle';
 import { useAudio } from '../hooks/useAudio';
-import { Prefs } from '../utils/storage';
+import { Prefs, setPrefs } from '../utils/storage';
+import {
+  BREATHING_PATTERNS,
+  BreathPattern,
+  DEFAULT_BREATH_PATTERN,
+  PREMIUM_PATTERNS,
+} from '../data/breathingPatterns';
+import { colors } from '../theme';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const chimeSound = require('../../assets/audio/chime.wav');
@@ -15,22 +22,11 @@ const brownSound = require('../../assets/audio/brown-loop.wav');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bowlSound = require('../../assets/audio/bowl-loop.wav');
 
-interface PhaseConfig {
-  phase: BreathPhase;
-  duration: number;
-  label: string;
-}
-
-const PHASES: PhaseConfig[] = [
-  { phase: 'in', duration: 4000, label: 'breathe in' },
-  { phase: 'out', duration: 4000, label: 'breathe out' },
-];
-
 const READY_DELAY = 3000;
 const AMBIENT_VOLUME = 0.25;
 const FADE_DURATION = 2000;
 const LOOP_DURATIONS = { rain: 57000, brown: 60000, bowl: 44000 };
-const CROSSFADE_DURATION = 4000; // 4s crossfade near loop boundary
+const CROSSFADE_DURATION = 4000;
 
 interface Props {
   prefs: Prefs;
@@ -38,6 +34,13 @@ interface Props {
 }
 
 export function BreathScreen({ prefs, onFinish }: Props) {
+  const showPatternPicker = prefs.duration >= 60;
+  const [selectedPattern, setSelectedPattern] = useState<BreathPattern>(
+    showPatternPicker ? prefs.breathPattern : DEFAULT_BREATH_PATTERN
+  );
+  const pattern = BREATHING_PATTERNS[selectedPattern] || BREATHING_PATTERNS[DEFAULT_BREATH_PATTERN];
+  const PHASES = pattern.phases;
+
   const hasAmbient = prefs.ambientSound !== 'off';
   const soundMap = { rain: rainSound, brown: brownSound, bowl: bowlSound } as const;
   const loopSound = soundMap[prefs.ambientSound as keyof typeof soundMap] || rainSound;
@@ -50,13 +53,23 @@ export function BreathScreen({ prefs, onFinish }: Props) {
   const ambientARef = useRef<Audio.Sound | null>(null);
   const ambientBRef = useRef<Audio.Sound | null>(null);
   const crossfadeRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const sessionVolRef = useRef(0); // current session volume (for fade-in/out)
+  const sessionVolRef = useRef(0);
   const rafRef = useRef<number | null>(null);
   const timerInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   const phaseTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const finished = useRef(false);
 
   const currentPhase = PHASES[phaseIndex];
+
+  useEffect(() => {
+    if (!showPatternPicker && selectedPattern !== DEFAULT_BREATH_PATTERN) {
+      setSelectedPattern(DEFAULT_BREATH_PATTERN);
+    }
+  }, [showPatternPicker, selectedPattern]);
+
+  useEffect(() => {
+    setPhaseIndex(0);
+  }, [selectedPattern]);
 
   // Load two ambient sound instances on mount for crossfade looping
   useEffect(() => {
@@ -72,7 +85,6 @@ export function BreathScreen({ prefs, onFinish }: Props) {
       ambientARef.current = a;
       ambientBRef.current = b;
 
-      // Offset instance B by half the loop duration for staggered crossfade
       if (b) {
         await b.setPositionAsync(loopDuration / 2);
       }
@@ -112,7 +124,7 @@ export function BreathScreen({ prefs, onFinish }: Props) {
 
       return next;
     });
-  }, [prefs.haptics]);
+  }, [prefs.haptics, PHASES]);
 
   // Phase cycling — only when ready
   useEffect(() => {
@@ -127,14 +139,12 @@ export function BreathScreen({ prefs, onFinish }: Props) {
   useEffect(() => {
     if (!ready || !hasAmbient) return;
 
-    // Wait for audio to be loaded before starting fade-in
     const waitAndStart = () => {
       if (!ambientARef.current) {
         setTimeout(waitAndStart, 100);
         return;
       }
 
-      // Fade in session volume
       const fadeStart = performance.now();
       const fadeIn = () => {
         const t = Math.min((performance.now() - fadeStart) / FADE_DURATION, 1);
@@ -143,7 +153,6 @@ export function BreathScreen({ prefs, onFinish }: Props) {
       };
       rafRef.current = requestAnimationFrame(fadeIn);
 
-      // Crossfade polling: adjust volumes near loop boundaries
       crossfadeRef.current = setInterval(async () => {
         const vol = sessionVolRef.current;
         const a = ambientARef.current;
@@ -201,14 +210,12 @@ export function BreathScreen({ prefs, onFinish }: Props) {
   useEffect(() => {
     if (!ready) return;
 
-    // Countdown
     timerInterval.current = setInterval(() => {
       setSeconds((prev) => {
         if (prev <= 1) {
           if (!finished.current) {
             finished.current = true;
             playAsset(chimeSound, 0.5);
-            // Fade out ambient sound
             if (ambientARef.current || ambientBRef.current) {
               const startTime = performance.now();
               const startVol = sessionVolRef.current;
@@ -241,14 +248,57 @@ export function BreathScreen({ prefs, onFinish }: Props) {
     stopAll();
   };
 
+  // Determine if current hold is after inhale
+  const holdAfterInhale = currentPhase.phase === 'hold' && phaseIndex > 0 && PHASES[phaseIndex - 1].phase === 'in';
+
+  const handlePatternSelect = useCallback(async (patternKey: BreathPattern) => {
+    if (!showPatternPicker || selectedPattern === patternKey) return;
+    setSelectedPattern(patternKey);
+    await setPrefs({ ...prefs, breathPattern: patternKey });
+  }, [prefs, selectedPattern, showPatternPicker]);
+
   return (
     <View style={styles.container}>
+      {showPatternPicker && (
+        <View style={styles.patternWrap}>
+          <Text style={styles.patternLabel}>pattern</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.patternList}
+          >
+            {(Object.keys(BREATHING_PATTERNS) as BreathPattern[]).map((patternKey) => (
+              <TouchableOpacity
+                key={patternKey}
+                style={[
+                  styles.patternPill,
+                  selectedPattern === patternKey && styles.patternPillActive,
+                ]}
+                onPress={() => handlePatternSelect(patternKey)}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.patternText,
+                    selectedPattern === patternKey && styles.patternTextActive,
+                  ]}
+                >
+                  {BREATHING_PATTERNS[patternKey].label}
+                  {PREMIUM_PATTERNS.includes(patternKey) ? ` · ${BREATHING_PATTERNS[patternKey].cycleSeconds}s` : ''}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
       <BreathCircle
-        phase={ready ? currentPhase.phase : 'ready'}
+        phase={ready ? (currentPhase.phase as BreathPhase) : 'ready'}
         phaseDuration={ready ? currentPhase.duration : READY_DELAY}
         seconds={ready ? seconds : prefs.duration || 30}
         hideTimer={prefs.hideTimer}
         breathWord={ready ? currentPhase.label : String(countdown)}
+        phases={PHASES}
+        holdAfterInhale={holdAfterInhale}
       />
     </View>
   );
@@ -260,5 +310,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,
+  },
+  patternWrap: {
+    position: 'absolute',
+    top: 96,
+    left: 0,
+    right: 0,
+  },
+  patternLabel: {
+    color: colors.textFaint,
+    fontFamily: 'DMSans',
+    fontSize: 12,
+    textAlign: 'center',
+    marginBottom: 12,
+    textTransform: 'lowercase',
+    letterSpacing: 1,
+  },
+  patternList: {
+    paddingHorizontal: 24,
+    gap: 10,
+  },
+  patternPill: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: colors.borderFaint,
+    backgroundColor: 'rgba(232, 228, 223, 0.03)',
+  },
+  patternPillActive: {
+    borderColor: colors.accentBorder,
+    backgroundColor: colors.accentSurface,
+  },
+  patternText: {
+    color: colors.textFaint,
+    fontFamily: 'DMSans',
+    fontSize: 13,
+  },
+  patternTextActive: {
+    color: colors.text,
   },
 });
