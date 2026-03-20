@@ -17,6 +17,7 @@ export type BreathPhase = 'in' | 'hold' | 'out' | 'ready';
 interface Props {
   phase: BreathPhase;
   phaseDuration: number;
+  phaseIndex: number;
   seconds: number;
   hideTimer: boolean;
   breathWord: string;
@@ -32,6 +33,7 @@ const HALO_SIZE = SIZE * 0.76; // warm halo behind core
 export function BreathCircle({
   phase,
   phaseDuration,
+  phaseIndex,
   seconds,
   hideTimer,
   breathWord,
@@ -47,6 +49,8 @@ export function BreathCircle({
   const ringOpacity = useSharedValue(0.72);
   // Halo opacity
   const haloOpacity = useSharedValue(0.5);
+  // Color phase: 0 = exhale (dim), 1 = inhale (bright) — drives smooth color crossfade
+  const colorPhase = useSharedValue(0);
   // Hold pulse
   const pulseScale = useSharedValue(1);
   // Word fade
@@ -87,6 +91,13 @@ export function BreathCircle({
         -1, false
       );
       haloOpacity.value = 0.5;
+      colorPhase.value = withRepeat(
+        withSequence(
+          withTiming(0.3, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+        ),
+        -1, false
+      );
     } else if (!started.current || lastPhasesKey.current !== phasesKey) {
       started.current = true;
       lastPhasesKey.current = phasesKey;
@@ -95,6 +106,7 @@ export function BreathCircle({
       const coreSeq: ReturnType<typeof withTiming>[] = [];
       const opacitySeq: ReturnType<typeof withTiming>[] = [];
       const haloSeq: ReturnType<typeof withTiming>[] = [];
+      const colorSeq: ReturnType<typeof withTiming>[] = [];
 
       for (const p of phases) {
         const ease = Easing.inOut(Easing.ease);
@@ -103,11 +115,13 @@ export function BreathCircle({
           coreSeq.push(withTiming(1.04, { duration: p.duration, easing: ease }));
           opacitySeq.push(withTiming(1, { duration: p.duration, easing: ease }));
           haloSeq.push(withTiming(0.8, { duration: p.duration, easing: ease }));
+          colorSeq.push(withTiming(1, { duration: p.duration, easing: ease }));
         } else if (p.phase === 'out') {
           ringSeq.push(withTiming(0.88, { duration: p.duration, easing: ease }));
           coreSeq.push(withTiming(0.94, { duration: p.duration, easing: ease }));
           opacitySeq.push(withTiming(0.72, { duration: p.duration, easing: ease }));
           haloSeq.push(withTiming(0.4, { duration: p.duration, easing: ease }));
+          colorSeq.push(withTiming(0, { duration: p.duration, easing: ease }));
         } else if (p.phase === 'hold') {
           const idx = phases.indexOf(p);
           const prev = idx > 0 ? phases[idx - 1].phase : 'in';
@@ -115,6 +129,7 @@ export function BreathCircle({
           coreSeq.push(withTiming(prev === 'in' ? 1.04 : 0.94, { duration: p.duration, easing: Easing.linear }));
           opacitySeq.push(withTiming(prev === 'in' ? 1 : 0.72, { duration: p.duration, easing: Easing.linear }));
           haloSeq.push(withTiming(prev === 'in' ? 0.8 : 0.4, { duration: p.duration, easing: Easing.linear }));
+          colorSeq.push(withTiming(0.5, { duration: p.duration, easing: Easing.linear }));
         }
       }
 
@@ -122,6 +137,7 @@ export function BreathCircle({
       coreScale.value = withRepeat(withSequence(...coreSeq) as number, -1, false);
       ringOpacity.value = withRepeat(withSequence(...opacitySeq) as number, -1, false);
       haloOpacity.value = withRepeat(withSequence(...haloSeq) as number, -1, false);
+      colorPhase.value = withRepeat(withSequence(...colorSeq) as number, -1, false);
     }
   }, [phase, phaseDuration, phases]);
 
@@ -156,13 +172,20 @@ export function BreathCircle({
 
   // === ANIMATED STYLES ===
 
-  // Outer ring — thin border with massive purple glow
+  // Outer ring — thin border with massive purple glow, smooth color crossfade
   const ringStyle = useAnimatedStyle(() => {
+    const cp = colorPhase.value;
     const fe = finalExhaleProgress.value;
-    const shadowColor = interpolateColor(fe, [0, 1],
-      ['rgba(165, 148, 249, 0.25)', 'rgba(240, 200, 150, 0.3)']);
-    const borderColor = interpolateColor(fe, [0, 1],
-      ['rgba(165, 148, 249, 0.85)', 'rgba(240, 200, 150, 0.85)']);
+
+    // Base colors: exhale (dim) → inhale (bright)
+    const baseBorder = interpolateColor(cp, [0, 0.5, 1],
+      ['rgba(165, 148, 249, 0.45)', 'rgba(200, 180, 230, 0.65)', 'rgba(165, 148, 249, 0.85)']);
+    const baseShadow = interpolateColor(cp, [0, 1],
+      ['rgba(165, 148, 249, 0.08)', 'rgba(165, 148, 249, 0.30)']);
+
+    // Final exhale: shift to golden
+    const borderColor = interpolateColor(fe, [0, 1], [baseBorder as string, 'rgba(240, 200, 150, 0.85)']);
+    const shadowColor = interpolateColor(fe, [0, 1], [baseShadow as string, 'rgba(240, 200, 150, 0.3)']);
 
     return {
       transform: [{ scale: ringScale.value * pulseScale.value }],
@@ -172,11 +195,15 @@ export function BreathCircle({
     };
   });
 
-  // Inner frosted core — parallax with ring
+  // Inner frosted core — parallax with ring, color synced to breath
   const coreStyle = useAnimatedStyle(() => {
+    const cp = colorPhase.value;
     const fe = finalExhaleProgress.value;
-    const bg = interpolateColor(fe, [0, 1],
-      ['rgba(165, 148, 249, 0.32)', 'rgba(240, 200, 150, 0.25)']);
+
+    // Exhale = dimmer, inhale = brighter
+    const baseBg = interpolateColor(cp, [0, 0.5, 1],
+      ['rgba(165, 148, 249, 0.12)', 'rgba(200, 180, 230, 0.20)', 'rgba(165, 148, 249, 0.32)']);
+    const bg = interpolateColor(fe, [0, 1], [baseBg as string, 'rgba(240, 200, 150, 0.25)']);
 
     return {
       transform: [{ scale: coreScale.value * pulseScale.value }],

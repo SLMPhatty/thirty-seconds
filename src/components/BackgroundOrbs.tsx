@@ -15,9 +15,10 @@ type BreathPhase = 'in' | 'hold' | 'out' | 'ready';
 interface Props {
   breathPhase?: BreathPhase;
   phaseDuration?: number;
+  phaseCounter?: number;
 }
 
-export function BackgroundOrbs({ breathPhase = 'ready', phaseDuration = 3000 }: Props) {
+export function BackgroundOrbs({ breathPhase = 'ready', phaseDuration = 3000, phaseCounter = 0 }: Props) {
   const orb1X = useSharedValue(0);
   const orb1Y = useSharedValue(0);
   const orb2X = useSharedValue(0);
@@ -110,7 +111,7 @@ export function BackgroundOrbs({ breathPhase = 'ready', phaseDuration = 3000 }: 
       -1,
       false
     );
-  }, [breathPhase, phaseDuration, groupScale, holdPulse, orbOpacity, radialStrength, screenPulseOpacity]);
+  }, [breathPhase, phaseDuration, phaseCounter, groupScale, holdPulse, orbOpacity, radialStrength, screenPulseOpacity]);
 
   const style1 = useAnimatedStyle(() => ({
     opacity: orbOpacity.value,

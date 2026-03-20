@@ -31,7 +31,7 @@ const CROSSFADE_DURATION = 4000;
 interface Props {
   prefs: Prefs;
   onFinish: () => void;
-  onVisualStateChange?: (phase: BreathPhase, duration: number) => void;
+  onVisualStateChange?: (phase: BreathPhase, duration: number, phaseIndex: number) => void;
 }
 
 export function BreathScreen({ prefs, onFinish, onVisualStateChange }: Props) {
@@ -160,8 +160,8 @@ export function BreathScreen({ prefs, onFinish, onVisualStateChange }: Props) {
   }, [ready, phaseIndex, advancePhase, currentPhase.duration]);
 
   useEffect(() => {
-    onVisualStateChange?.(ready ? (currentPhase.phase as BreathPhase) : 'ready', ready ? currentPhase.duration : READY_DELAY);
-  }, [currentPhase.duration, currentPhase.phase, onVisualStateChange, ready]);
+    onVisualStateChange?.(ready ? (currentPhase.phase as BreathPhase) : 'ready', ready ? currentPhase.duration : READY_DELAY, phaseIndex);
+  }, [currentPhase.duration, currentPhase.phase, onVisualStateChange, ready, phaseIndex]);
 
   // Fade ambient sound in when session starts + crossfade polling
   useEffect(() => {
@@ -316,6 +316,7 @@ export function BreathScreen({ prefs, onFinish, onVisualStateChange }: Props) {
       <BreathCircle
         phase={ready ? (currentPhase.phase as BreathPhase) : 'ready'}
         phaseDuration={ready ? currentPhase.duration : READY_DELAY}
+        phaseIndex={phaseIndex}
         seconds={ready ? seconds : prefs.duration || 30}
         hideTimer={prefs.hideTimer}
         breathWord={ready ? currentPhase.label : String(countdown)}

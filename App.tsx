@@ -29,6 +29,7 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>('start');
   const [breathPhase, setBreathPhase] = useState<'in' | 'hold' | 'out' | 'ready'>('ready');
   const [phaseDuration, setPhaseDuration] = useState(3000);
+  const [phaseCounter, setPhaseCounter] = useState(0);
   const [prefs, setLocalPrefs] = useState<Prefs>({
     ambientSound: 'rain',
     hideTimer: false,
@@ -121,7 +122,7 @@ export default function App() {
   return (
     <View style={styles.container} onLayout={onLayoutRootView}>
       <StatusBar style="light" />
-      <BackgroundOrbs breathPhase={screen === 'breath' ? breathPhase : 'ready'} phaseDuration={phaseDuration} />
+      <BackgroundOrbs breathPhase={screen === 'breath' ? breathPhase : 'ready'} phaseDuration={phaseDuration} phaseCounter={phaseCounter} />
 
       {screen === 'onboarding' && (
         <OnboardingScreen onComplete={handleOnboardingComplete} />
@@ -137,9 +138,10 @@ export default function App() {
         <BreathScreen
           prefs={prefs}
           onFinish={handleFinish}
-          onVisualStateChange={(phase, duration) => {
+          onVisualStateChange={(phase, duration, idx) => {
             setBreathPhase(phase);
             setPhaseDuration(duration);
+            setPhaseCounter(idx);
           }}
         />
       )}
