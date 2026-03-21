@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { LogBox } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { BackgroundOrbs } from './src/components/BackgroundOrbs';
@@ -19,6 +20,7 @@ import { useStreakProtection } from './src/hooks/useStreakProtection';
 import { updateWidget } from './src/utils/widget';
 import { colors } from './src/theme';
 
+LogBox.ignoreAllLogs();
 SplashScreen.preventAutoHideAsync();
 
 type Screen = 'onboarding' | 'start' | 'breath' | 'afterglow' | 'done' | 'reminder' | 'unlock' | 'history';
