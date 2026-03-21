@@ -26,9 +26,19 @@ interface Props {
   holdAfterInhale?: boolean;
 }
 
+// ── Sizing to match website exactly ──
+// Website: .breathing-wrap is the full container
+// Website: .breathing-ring is inset:0 (full size), scales 0.88→1.06
+// Website: .breathing-core is inset:18% (64% of container), scales 0.94→1.04
+// Website: ::before (warm halo) is inset:12% (76% of container)
+// Website: ::after (center glow) is inset:28% (44% of container)
 const SIZE = 280;
-const CORE_SIZE = SIZE * 0.64; // inner core is 64% of ring — matches website's inset: 18%
-const HALO_SIZE = SIZE * 0.76; // warm halo behind core
+const CORE_SIZE = SIZE * 0.64;
+const HALO_SIZE = SIZE * 0.76;
+const CENTER_GLOW_SIZE = SIZE * 0.44;
+
+// Website uses 6s cycle for the hero idle animation
+const IDLE_HALF_CYCLE = 3000;
 
 export function BreathCircle({
   phase,
@@ -41,15 +51,15 @@ export function BreathCircle({
   phases,
   holdAfterInhale,
 }: Props) {
-  // Ring scale: 0.88 → 1.06 (matches website exactly)
+  // Matches website: ring scales 0.88 → 1.06
   const ringScale = useSharedValue(0.88);
-  // Core scale: 0.94 → 1.04 (slightly less = parallax depth)
+  // Matches website: core scales 0.94 → 1.04
   const coreScale = useSharedValue(0.94);
-  // Ring opacity: 0.72 → 1.0
+  // Matches website: ring opacity 0.72 → 1.0
   const ringOpacity = useSharedValue(0.72);
-  // Halo opacity
+  // Halo breathes with ring
   const haloOpacity = useSharedValue(0.5);
-  // Color phase: 0 = exhale (dim), 1 = inhale (bright) — drives smooth color crossfade
+  // Color driver: 0=exhaled(dim) → 1=inhaled(bright)
   const colorPhase = useSharedValue(0);
   // Hold pulse
   const pulseScale = useSharedValue(1);
@@ -61,45 +71,51 @@ export function BreathCircle({
   const started = useRef(false);
   const lastPhasesKey = useRef('');
 
-  // Build ring + core animation sequences from phase configs
   useEffect(() => {
     const phasesKey = phases.map(p => `${p.phase}:${p.duration}`).join(',');
+    const ease = Easing.inOut(Easing.ease);
 
     if (phase === 'ready') {
+      // ── IDLE STATE ──
+      // Matches website hero: gentle 6s breathing cycle
       started.current = false;
       lastPhasesKey.current = '';
-      // Gentle idle breathing — use reverse for seamless loop
+
       ringScale.value = 0.88;
       ringScale.value = withRepeat(
-        withTiming(0.92, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.92, { duration: IDLE_HALF_CYCLE, easing: ease }),
         -1, true
       );
       coreScale.value = 0.94;
       coreScale.value = withRepeat(
-        withTiming(0.97, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.97, { duration: IDLE_HALF_CYCLE, easing: ease }),
         -1, true
       );
       ringOpacity.value = 0.72;
       ringOpacity.value = withRepeat(
-        withTiming(0.8, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.85, { duration: IDLE_HALF_CYCLE, easing: ease }),
         -1, true
       );
-      haloOpacity.value = 0.5;
+      haloOpacity.value = 0.4;
+      haloOpacity.value = withRepeat(
+        withTiming(0.6, { duration: IDLE_HALF_CYCLE, easing: ease }),
+        -1, true
+      );
       colorPhase.value = 0;
       colorPhase.value = withRepeat(
-        withTiming(0.3, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.3, { duration: IDLE_HALF_CYCLE, easing: ease }),
         -1, true
       );
     } else if (!started.current || lastPhasesKey.current !== phasesKey) {
+      // ── ACTIVE BREATHING ──
       started.current = true;
       lastPhasesKey.current = phasesKey;
 
-      // Check if this is a simple 2-phase (in/out) pattern
       const isSimpleBreath = phases.length === 2 && phases[0].phase === 'in' && phases[1].phase === 'out';
-      const ease = Easing.inOut(Easing.ease);
 
       if (isSimpleBreath) {
-        // Use reverse:true for seamless in↔out with no skip beat
+        // Simple in/out: use reverse:true for perfectly seamless breathing
+        // This matches the website's CSS keyframes behavior exactly
         const inDur = phases[0].duration;
 
         ringScale.value = 0.88;
@@ -128,7 +144,7 @@ export function BreathCircle({
           -1, true
         );
       } else {
-        // Multi-phase (box, 4-7-8, coherence) — use sequence
+        // Multi-phase patterns (box, 4-7-8, coherence)
         const ringSeq: ReturnType<typeof withTiming>[] = [];
         const coreSeq: ReturnType<typeof withTiming>[] = [];
         const opacitySeq: ReturnType<typeof withTiming>[] = [];
@@ -195,20 +211,18 @@ export function BreathCircle({
     });
   }, [finalExhaleProgress, isFinalExhale, phaseDuration]);
 
-  // === ANIMATED STYLES ===
+  // ── ANIMATED STYLES ──
+  // Matches website: .breathing-ring has border + box-shadow glow, color crossfades with breath
 
-  // Outer ring — thin border with massive purple glow, smooth color crossfade
   const ringStyle = useAnimatedStyle(() => {
     const cp = colorPhase.value;
     const fe = finalExhaleProgress.value;
 
-    // Base colors: exhale (dim) → inhale (bright)
     const baseBorder = interpolateColor(cp, [0, 0.5, 1],
       ['rgba(165, 148, 249, 0.45)', 'rgba(200, 180, 230, 0.65)', 'rgba(165, 148, 249, 0.85)']);
     const baseShadow = interpolateColor(cp, [0, 1],
       ['rgba(165, 148, 249, 0.08)', 'rgba(165, 148, 249, 0.30)']);
 
-    // Final exhale: shift to golden
     const borderColor = interpolateColor(fe, [0, 1], [baseBorder as string, 'rgba(240, 200, 150, 0.85)']);
     const shadowColor = interpolateColor(fe, [0, 1], [baseShadow as string, 'rgba(240, 200, 150, 0.3)']);
 
@@ -220,12 +234,11 @@ export function BreathCircle({
     };
   });
 
-  // Inner frosted core — parallax with ring, color synced to breath
+  // Matches website: .breathing-core has radial gradient bg + highlight + parallax scale
   const coreStyle = useAnimatedStyle(() => {
     const cp = colorPhase.value;
     const fe = finalExhaleProgress.value;
 
-    // Exhale = dimmer, inhale = brighter
     const baseBg = interpolateColor(cp, [0, 0.5, 1],
       ['rgba(165, 148, 249, 0.12)', 'rgba(200, 180, 230, 0.20)', 'rgba(165, 148, 249, 0.32)']);
     const bg = interpolateColor(fe, [0, 1], [baseBg as string, 'rgba(240, 200, 150, 0.25)']);
@@ -236,7 +249,7 @@ export function BreathCircle({
     };
   });
 
-  // Warm halo behind everything
+  // Matches website: ::before warm radial halo
   const haloStyle = useAnimatedStyle(() => ({
     opacity: haloOpacity.value,
     transform: [{ scale: ringScale.value * 0.95 }],
@@ -248,19 +261,19 @@ export function BreathCircle({
 
   return (
     <View style={styles.wrap}>
-      {/* Warm halo glow — behind ring */}
+      {/* Website ::before — warm radial gradient halo behind ring */}
       <Animated.View style={[styles.halo, haloStyle]} />
 
-      {/* Outer breathing ring — thin border + box shadow glow */}
+      {/* Website .breathing-ring — thin border + purple glow */}
       <Animated.View style={[styles.ring, ringStyle]} />
 
-      {/* Inner frosted core — parallax scale */}
+      {/* Website .breathing-core — frosted glass with highlight */}
       <Animated.View style={[styles.core, coreStyle]}>
-        {/* Highlight spot (top-left light reflection) */}
+        {/* Website: radial-gradient at 30% 30% — top-left light reflection */}
         <View style={styles.highlight} />
       </Animated.View>
 
-      {/* Center white glow */}
+      {/* Website ::after — center white glow */}
       <View style={styles.centerGlow} />
 
       {/* Timer */}
@@ -282,15 +295,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 48,
   },
-  // Warm halo behind the ring
+  // Website ::before — warm radial gradient halo
+  // inset: 12% = 76% of container
   halo: {
     position: 'absolute',
     width: HALO_SIZE,
     height: HALO_SIZE,
     borderRadius: HALO_SIZE / 2,
-    backgroundColor: 'rgba(240, 200, 150, 0.12)',
+    backgroundColor: 'rgba(240, 200, 150, 0.14)',
   },
-  // Outer ring — matches website's breathing-ring
+  // Website .breathing-ring
+  // border: 1.5px solid rgba(165, 148, 249, 0.85)
+  // box-shadow: 0 0 50px rgba(165, 148, 249, 0.25)
   ring: {
     position: 'absolute',
     width: SIZE,
@@ -299,27 +315,29 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: 'rgba(165, 148, 249, 0.85)',
     backgroundColor: 'transparent',
-    // React Native shadow (iOS) — emulates box-shadow glow
     shadowColor: 'rgba(165, 148, 249, 1)',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.25,
     shadowRadius: 50,
   },
-  // Inner core — matches website's breathing-core (frosted glass effect)
+  // Website .breathing-core
+  // inset: 18% = 64% of container
+  // background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), transparent 35%),
+  //             radial-gradient(circle, rgba(165,148,249,0.32), ...)
+  // backdrop-filter: blur(18px)
   core: {
     position: 'absolute',
     width: CORE_SIZE,
     height: CORE_SIZE,
     borderRadius: CORE_SIZE / 2,
     backgroundColor: 'rgba(165, 148, 249, 0.32)',
-    // Inner glow shadow
     shadowColor: 'rgba(255, 255, 255, 1)',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.05,
     shadowRadius: 40,
     overflow: 'hidden',
   },
-  // Highlight spot — top-left light reflection like website
+  // Website: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), transparent 35%)
   highlight: {
     position: 'absolute',
     top: '15%',
@@ -329,12 +347,13 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
-  // Center white glow
+  // Website ::after — center white glow
+  // inset: 28% = 44% of container
   centerGlow: {
     position: 'absolute',
-    width: CORE_SIZE * 0.5,
-    height: CORE_SIZE * 0.5,
-    borderRadius: (CORE_SIZE * 0.5) / 2,
+    width: CENTER_GLOW_SIZE,
+    height: CENTER_GLOW_SIZE,
+    borderRadius: CENTER_GLOW_SIZE / 2,
     backgroundColor: 'rgba(255, 255, 255, 0.06)',
   },
   timer: {
