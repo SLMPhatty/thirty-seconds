@@ -68,88 +68,113 @@ export function BreathCircle({
     if (phase === 'ready') {
       started.current = false;
       lastPhasesKey.current = '';
-      // Gentle idle breathing
+      // Gentle idle breathing — use reverse for seamless loop
+      ringScale.value = 0.88;
       ringScale.value = withRepeat(
-        withSequence(
-          withTiming(0.92, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
-          withTiming(0.88, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
-        ),
-        -1, false
+        withTiming(0.92, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+        -1, true
       );
+      coreScale.value = 0.94;
       coreScale.value = withRepeat(
-        withSequence(
-          withTiming(0.97, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
-          withTiming(0.94, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
-        ),
-        -1, false
+        withTiming(0.97, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+        -1, true
       );
+      ringOpacity.value = 0.72;
       ringOpacity.value = withRepeat(
-        withSequence(
-          withTiming(0.8, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
-          withTiming(0.72, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
-        ),
-        -1, false
+        withTiming(0.8, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+        -1, true
       );
       haloOpacity.value = 0.5;
+      colorPhase.value = 0;
       colorPhase.value = withRepeat(
-        withSequence(
-          withTiming(0.3, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
-          withTiming(0, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
-        ),
-        -1, false
+        withTiming(0.3, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+        -1, true
       );
     } else if (!started.current || lastPhasesKey.current !== phasesKey) {
       started.current = true;
       lastPhasesKey.current = phasesKey;
 
-      const ringSeq: ReturnType<typeof withTiming>[] = [];
-      const coreSeq: ReturnType<typeof withTiming>[] = [];
-      const opacitySeq: ReturnType<typeof withTiming>[] = [];
-      const haloSeq: ReturnType<typeof withTiming>[] = [];
-      const colorSeq: ReturnType<typeof withTiming>[] = [];
+      // Check if this is a simple 2-phase (in/out) pattern
+      const isSimpleBreath = phases.length === 2 && phases[0].phase === 'in' && phases[1].phase === 'out';
+      const ease = Easing.inOut(Easing.ease);
 
-      for (const p of phases) {
-        const ease = Easing.inOut(Easing.ease);
-        if (p.phase === 'in') {
-          ringSeq.push(withTiming(1.06, { duration: p.duration, easing: ease }));
-          coreSeq.push(withTiming(1.04, { duration: p.duration, easing: ease }));
-          opacitySeq.push(withTiming(1, { duration: p.duration, easing: ease }));
-          haloSeq.push(withTiming(0.8, { duration: p.duration, easing: ease }));
-          colorSeq.push(withTiming(1, { duration: p.duration, easing: ease }));
-        } else if (p.phase === 'out') {
-          ringSeq.push(withTiming(0.88, { duration: p.duration, easing: ease }));
-          coreSeq.push(withTiming(0.94, { duration: p.duration, easing: ease }));
-          opacitySeq.push(withTiming(0.72, { duration: p.duration, easing: ease }));
-          haloSeq.push(withTiming(0.4, { duration: p.duration, easing: ease }));
-          colorSeq.push(withTiming(0, { duration: p.duration, easing: ease }));
-        } else if (p.phase === 'hold') {
-          const idx = phases.indexOf(p);
-          const prev = idx > 0 ? phases[idx - 1].phase : 'in';
-          ringSeq.push(withTiming(prev === 'in' ? 1.06 : 0.88, { duration: p.duration, easing: Easing.linear }));
-          coreSeq.push(withTiming(prev === 'in' ? 1.04 : 0.94, { duration: p.duration, easing: Easing.linear }));
-          opacitySeq.push(withTiming(prev === 'in' ? 1 : 0.72, { duration: p.duration, easing: Easing.linear }));
-          haloSeq.push(withTiming(prev === 'in' ? 0.8 : 0.4, { duration: p.duration, easing: Easing.linear }));
-          colorSeq.push(withTiming(0.5, { duration: p.duration, easing: Easing.linear }));
+      if (isSimpleBreath) {
+        // Use reverse:true for seamless in↔out with no skip beat
+        const inDur = phases[0].duration;
+
+        ringScale.value = 0.88;
+        ringScale.value = withRepeat(
+          withTiming(1.06, { duration: inDur, easing: ease }),
+          -1, true
+        );
+        coreScale.value = 0.94;
+        coreScale.value = withRepeat(
+          withTiming(1.04, { duration: inDur, easing: ease }),
+          -1, true
+        );
+        ringOpacity.value = 0.72;
+        ringOpacity.value = withRepeat(
+          withTiming(1, { duration: inDur, easing: ease }),
+          -1, true
+        );
+        haloOpacity.value = 0.4;
+        haloOpacity.value = withRepeat(
+          withTiming(0.8, { duration: inDur, easing: ease }),
+          -1, true
+        );
+        colorPhase.value = 0;
+        colorPhase.value = withRepeat(
+          withTiming(1, { duration: inDur, easing: ease }),
+          -1, true
+        );
+      } else {
+        // Multi-phase (box, 4-7-8, coherence) — use sequence
+        const ringSeq: ReturnType<typeof withTiming>[] = [];
+        const coreSeq: ReturnType<typeof withTiming>[] = [];
+        const opacitySeq: ReturnType<typeof withTiming>[] = [];
+        const haloSeq: ReturnType<typeof withTiming>[] = [];
+        const colorSeq: ReturnType<typeof withTiming>[] = [];
+
+        for (const p of phases) {
+          if (p.phase === 'in') {
+            ringSeq.push(withTiming(1.06, { duration: p.duration, easing: ease }));
+            coreSeq.push(withTiming(1.04, { duration: p.duration, easing: ease }));
+            opacitySeq.push(withTiming(1, { duration: p.duration, easing: ease }));
+            haloSeq.push(withTiming(0.8, { duration: p.duration, easing: ease }));
+            colorSeq.push(withTiming(1, { duration: p.duration, easing: ease }));
+          } else if (p.phase === 'out') {
+            ringSeq.push(withTiming(0.88, { duration: p.duration, easing: ease }));
+            coreSeq.push(withTiming(0.94, { duration: p.duration, easing: ease }));
+            opacitySeq.push(withTiming(0.72, { duration: p.duration, easing: ease }));
+            haloSeq.push(withTiming(0.4, { duration: p.duration, easing: ease }));
+            colorSeq.push(withTiming(0, { duration: p.duration, easing: ease }));
+          } else if (p.phase === 'hold') {
+            const idx = phases.indexOf(p);
+            const prev = idx > 0 ? phases[idx - 1].phase : 'in';
+            ringSeq.push(withTiming(prev === 'in' ? 1.06 : 0.88, { duration: p.duration, easing: Easing.linear }));
+            coreSeq.push(withTiming(prev === 'in' ? 1.04 : 0.94, { duration: p.duration, easing: Easing.linear }));
+            opacitySeq.push(withTiming(prev === 'in' ? 1 : 0.72, { duration: p.duration, easing: Easing.linear }));
+            haloSeq.push(withTiming(prev === 'in' ? 0.8 : 0.4, { duration: p.duration, easing: Easing.linear }));
+            colorSeq.push(withTiming(0.5, { duration: p.duration, easing: Easing.linear }));
+          }
         }
-      }
 
-      ringScale.value = withRepeat(withSequence(...ringSeq) as number, -1, false);
-      coreScale.value = withRepeat(withSequence(...coreSeq) as number, -1, false);
-      ringOpacity.value = withRepeat(withSequence(...opacitySeq) as number, -1, false);
-      haloOpacity.value = withRepeat(withSequence(...haloSeq) as number, -1, false);
-      colorPhase.value = withRepeat(withSequence(...colorSeq) as number, -1, false);
+        ringScale.value = withRepeat(withSequence(...ringSeq) as number, -1, false);
+        coreScale.value = withRepeat(withSequence(...coreSeq) as number, -1, false);
+        ringOpacity.value = withRepeat(withSequence(...opacitySeq) as number, -1, false);
+        haloOpacity.value = withRepeat(withSequence(...haloSeq) as number, -1, false);
+        colorPhase.value = withRepeat(withSequence(...colorSeq) as number, -1, false);
+      }
     }
   }, [phase, phaseDuration, phases]);
 
   // Hold pulse
   useEffect(() => {
     if (phase === 'hold') {
+      pulseScale.value = 1;
       pulseScale.value = withRepeat(
-        withSequence(
-          withTiming(1.02, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
-          withTiming(1, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
-        ),
-        -1, false,
+        withTiming(1.02, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
+        -1, true,
       );
     } else {
       pulseScale.value = withTiming(1, { duration: 300 });

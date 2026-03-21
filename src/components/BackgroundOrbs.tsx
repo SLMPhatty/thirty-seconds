@@ -1,31 +1,27 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withRepeat,
-  withSequence,
   withTiming,
   Easing,
   interpolate,
 } from 'react-native-reanimated';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
-const BREATH_DURATION = 4000; // 4s inhale + 4s exhale = 8s total cycle
+const BREATH_DURATION = 4000;
 
 export function BackgroundOrbs() {
-  // Single driver: 0 → 1 → 0 continuously (one full breath cycle)
+  // Single driver: 0 → 1 → 0 continuously
+  // Using reverse:true so the easing curve is mirrored seamlessly
   const breath = useSharedValue(0);
 
   useEffect(() => {
-    // Start a continuous breathing loop immediately
     breath.value = withRepeat(
-      withSequence(
-        withTiming(1, { duration: BREATH_DURATION, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0, { duration: BREATH_DURATION, easing: Easing.inOut(Easing.ease) }),
-      ),
+      withTiming(1, { duration: BREATH_DURATION, easing: Easing.inOut(Easing.ease) }),
       -1,
-      false
+      true // reverse — smoothly goes 0→1→0 with no skip
     );
   }, []);
 
@@ -41,10 +37,8 @@ export function BackgroundOrbs() {
 
   // Orb 2 — bottom right, warm
   const orb2Style = useAnimatedStyle(() => {
-    // Offset phase slightly for organic feel
-    const phase = Math.min(1, Math.max(0, breath.value));
-    const scale = interpolate(phase, [0, 1], [0.95, 1.1]);
-    const opacity = interpolate(phase, [0, 1], [0.2, 0.45]);
+    const scale = interpolate(breath.value, [0, 1], [0.95, 1.1]);
+    const opacity = interpolate(breath.value, [0, 1], [0.2, 0.45]);
     return {
       opacity,
       transform: [{ scale }],
