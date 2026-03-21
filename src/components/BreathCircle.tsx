@@ -267,11 +267,8 @@ export function BreathCircle({
       {/* Website .breathing-ring — thin border + purple glow */}
       <Animated.View style={[styles.ring, ringStyle]} />
 
-      {/* Website .breathing-core — frosted glass with highlight */}
-      <Animated.View style={[styles.core, coreStyle]}>
-        {/* Website: radial-gradient at 30% 30% — top-left light reflection */}
-        <View style={styles.highlight} />
-      </Animated.View>
+      {/* Website .breathing-core — frosted glass */}
+      <Animated.View style={[styles.core, coreStyle]} />
 
       {/* Website ::after — center white glow */}
       <View style={styles.centerGlow} />
@@ -336,16 +333,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 40,
     overflow: 'hidden',
-  },
-  // Website: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), transparent 35%)
-  highlight: {
-    position: 'absolute',
-    top: '15%',
-    left: '15%',
-    width: '35%',
-    height: '35%',
-    borderRadius: 999,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
   // Website ::after — center white glow
   // inset: 28% = 44% of container
