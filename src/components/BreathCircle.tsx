@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, {
+  interpolate,
   interpolateColor,
   useSharedValue,
   useAnimatedStyle,
@@ -175,11 +176,18 @@ export function BreathCircle({
           }
         }
 
-        ringScale.value = withRepeat(withSequence(...ringSeq) as number, -1, false);
-        coreScale.value = withRepeat(withSequence(...coreSeq) as number, -1, false);
-        ringOpacity.value = withRepeat(withSequence(...opacitySeq) as number, -1, false);
-        haloOpacity.value = withRepeat(withSequence(...haloSeq) as number, -1, false);
-        colorPhase.value = withRepeat(withSequence(...colorSeq) as number, -1, false);
+        // Reset to initial values before starting multi-phase sequence
+        ringScale.value = 0.88;
+        coreScale.value = 0.94;
+        ringOpacity.value = 0.72;
+        haloOpacity.value = 0.4;
+        colorPhase.value = 0;
+
+        ringScale.value = withRepeat(withSequence(...ringSeq), -1, false);
+        coreScale.value = withRepeat(withSequence(...coreSeq), -1, false);
+        ringOpacity.value = withRepeat(withSequence(...opacitySeq), -1, false);
+        haloOpacity.value = withRepeat(withSequence(...haloSeq), -1, false);
+        colorPhase.value = withRepeat(withSequence(...colorSeq), -1, false);
       }
     }
   }, [phase, phaseDuration, phases]);
@@ -212,44 +220,43 @@ export function BreathCircle({
   }, [finalExhaleProgress, isFinalExhale, phaseDuration]);
 
   // ── ANIMATED STYLES ──
-  // Matches website: .breathing-ring has border + box-shadow glow, color crossfades with breath
+  // Split transforms from color interpolation into separate worklets so that
+  // if interpolateColor fails on the UI thread (reanimated 4.x issue), the
+  // scale/opacity animations still work.
 
-  const ringStyle = useAnimatedStyle(() => {
+  const ringTransformStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: ringScale.value * pulseScale.value }],
+    opacity: ringOpacity.value,
+  }));
+
+  const ringColorStyle = useAnimatedStyle(() => {
     const cp = colorPhase.value;
     const fe = finalExhaleProgress.value;
+    const t = interpolate(cp, [0, 0.5, 1], [0, 1, 2]) * (1 - fe) + 3 * fe;
 
-    const baseBorder = interpolateColor(cp, [0, 0.5, 1],
-      ['rgba(165, 148, 249, 0.45)', 'rgba(200, 180, 230, 0.65)', 'rgba(165, 148, 249, 0.85)']);
-    const baseShadow = interpolateColor(cp, [0, 1],
-      ['rgba(165, 148, 249, 0.08)', 'rgba(165, 148, 249, 0.30)']);
+    const borderColor = interpolateColor(t, [0, 1, 2, 3],
+      ['rgba(165, 148, 249, 0.45)', 'rgba(200, 180, 230, 0.65)', 'rgba(165, 148, 249, 0.85)', 'rgba(240, 200, 150, 0.85)']);
+    const shadowColor = interpolateColor(t, [0, 2, 3],
+      ['rgba(165, 148, 249, 0.08)', 'rgba(165, 148, 249, 0.30)', 'rgba(240, 200, 150, 0.3)']);
 
-    const borderColor = interpolateColor(fe, [0, 1], [baseBorder as string, 'rgba(240, 200, 150, 0.85)']);
-    const shadowColor = interpolateColor(fe, [0, 1], [baseShadow as string, 'rgba(240, 200, 150, 0.3)']);
-
-    return {
-      transform: [{ scale: ringScale.value * pulseScale.value }],
-      opacity: ringOpacity.value,
-      borderColor,
-      shadowColor,
-    };
+    return { borderColor, shadowColor };
   });
 
-  // Matches website: .breathing-core has radial gradient bg + highlight + parallax scale
-  const coreStyle = useAnimatedStyle(() => {
+  const coreTransformStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: coreScale.value * pulseScale.value }],
+  }));
+
+  const coreColorStyle = useAnimatedStyle(() => {
     const cp = colorPhase.value;
     const fe = finalExhaleProgress.value;
+    const t = interpolate(cp, [0, 0.5, 1], [0, 1, 2]) * (1 - fe) + 3 * fe;
 
-    const baseBg = interpolateColor(cp, [0, 0.5, 1],
-      ['rgba(165, 148, 249, 0.12)', 'rgba(200, 180, 230, 0.20)', 'rgba(165, 148, 249, 0.32)']);
-    const bg = interpolateColor(fe, [0, 1], [baseBg as string, 'rgba(240, 200, 150, 0.25)']);
+    const backgroundColor = interpolateColor(t, [0, 1, 2, 3],
+      ['rgba(165, 148, 249, 0.12)', 'rgba(200, 180, 230, 0.20)', 'rgba(165, 148, 249, 0.32)', 'rgba(240, 200, 150, 0.25)']);
 
-    return {
-      transform: [{ scale: coreScale.value * pulseScale.value }],
-      backgroundColor: bg,
-    };
+    return { backgroundColor };
   });
 
-  // Matches website: ::before warm radial halo
   const haloStyle = useAnimatedStyle(() => ({
     opacity: haloOpacity.value,
     transform: [{ scale: ringScale.value * 0.95 }],
@@ -265,10 +272,10 @@ export function BreathCircle({
       <Animated.View style={[styles.halo, haloStyle]} />
 
       {/* Website .breathing-ring — thin border + purple glow */}
-      <Animated.View style={[styles.ring, ringStyle]} />
+      <Animated.View style={[styles.ring, ringTransformStyle, ringColorStyle]} />
 
       {/* Website .breathing-core — frosted glass */}
-      <Animated.View style={[styles.core, coreStyle]} />
+      <Animated.View style={[styles.core, coreTransformStyle, coreColorStyle]} />
 
       {/* Website ::after — center white glow */}
       <View style={styles.centerGlow} />
