@@ -13,16 +13,15 @@
     },
     "ios": {
       "supportsTablet": false,
-      "buildNumber": "4",
+      "buildNumber": "13",
       "bundleIdentifier": "com.thirty.app",
       "appleTeamId": "B2MV35NY53",
       "entitlements": {
-        "com.apple.security.application-groups": ["group.com.thirty.app"]
+        "com.apple.security.application-groups": [
+          "group.com.thirty.app"
+        ]
       },
       "infoPlist": {
-        "UIBackgroundModes": [
-          "audio"
-        ],
         "ITSAppUsesNonExemptEncryption": false,
         "NSHealthShareUsageDescription": "thirty uses HealthKit to log your mindful minutes.",
         "NSHealthUpdateUsageDescription": "thirty logs your meditation sessions as mindful minutes in Health."

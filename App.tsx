@@ -36,6 +36,7 @@ export default function App() {
     ambientSound: 'rain',
     hideTimer: false,
     haptics: true,
+    healthKit: true,
     duration: 30,
     breathPattern: DEFAULT_BREATH_PATTERN,
     reminderTime: 'off',
@@ -100,7 +101,9 @@ export default function App() {
 
   const handleFinish = async () => {
     await recordSession(prefs.duration);
-    await logSessionToHealthKit(prefs.duration);
+    if (prefs.healthKit) {
+      await logSessionToHealthKit(prefs.duration);
+    }
     const streak = await getStreak();
     await updateWidget(streak);
     if (prefs.reminderTime !== 'off') {

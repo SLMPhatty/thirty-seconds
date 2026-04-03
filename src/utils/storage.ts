@@ -27,6 +27,7 @@ export interface Prefs {
   ambientSound: AmbientSound;
   hideTimer: boolean;
   haptics: boolean;
+  healthKit: boolean;
   duration: number;
   breathPattern: BreathPattern;
   reminderTime: 'morning' | 'afternoon' | 'evening' | 'off';
@@ -46,6 +47,7 @@ const defaultPrefs: Prefs = {
   ambientSound: 'rain',
   hideTimer: false,
   haptics: true,
+  healthKit: true,
   duration: 30,
   breathPattern: DEFAULT_BREATH_PATTERN,
   reminderTime: 'off',

@@ -4,7 +4,7 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { colors } from '../theme';
 import { getQuote } from '../utils/quotes';
-import { getData, isUnlocked as checkUnlocked, getMilestoneMessage, getFreeSessions, MILESTONES } from '../utils/storage';
+import { getData, isUnlocked as checkUnlocked, getMilestoneMessage, getFreeSessions, getPrefs, MILESTONES } from '../utils/storage';
 
 interface Props {
   onAgain: () => void;
@@ -25,10 +25,10 @@ export function DoneScreen({ onAgain, onUnlock }: Props) {
   const [unlocked, setUnlocked] = useState(false);
   const [milestone, setMilestone] = useState<string | null>(null);
   const [freeLeft, setFreeLeft] = useState(0);
-
   useEffect(() => {
     (async () => {
       const d = await getData();
+      const p = await getPrefs();
       setQuote(getQuote(d.totalSessions));
       setStreak(d.streak);
       setUnlocked(await checkUnlocked());
@@ -136,6 +136,12 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans',
     textTransform: 'lowercase',
     letterSpacing: 1,
+  },
+  healthKitNote: {
+    fontSize: 12,
+    color: colors.textFaint,
+    fontFamily: 'DMSans',
+    marginBottom: 24,
   },
   streakNumMilestone: {
     fontSize: 80,

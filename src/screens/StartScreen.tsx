@@ -40,6 +40,7 @@ export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
     ambientSound: 'rain',
     hideTimer: false,
     haptics: true,
+    healthKit: true,
     duration: 30,
     breathPattern: DEFAULT_BREATH_PATTERN,
     reminderTime: 'off',
