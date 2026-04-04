@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>thirty | 30 seconds is all you need.</title>
+  <meta name="description" content="thirty is a meditation app built for calm in under a minute. Open, breathe, and return to your day in thirty seconds.">
+  <meta name="keywords" content="thirty, meditation app, breathing app, mindfulness, calm, wellness">
+  <meta name="theme-color" content="#0a0a12">
+  <meta property="og:title" content="thirty | 30 seconds is all you need.">
+  <meta property="og:description" content="A luxury-feeling meditation app for a moment of stillness in just thirty seconds.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="app-icon.png">
+  <meta property="og:url" content="#">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="thirty | 30 seconds is all you need.">
+  <meta name="twitter:description" content="Open, breathe, and be done in thirty seconds.">
+  <meta name="twitter:image" content="app-icon.png">
+  <link rel="icon" type="image/png" href="app-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a12;
+      --bg2: #0f1028;
+      --text: #e8e4df;
+      --dim: rgba(232, 228, 223, 0.5);
+      --accent: #a594f9;
+      --warm: #f0c896;
+      --border: rgba(232, 228, 223, 0.12);
+      --surface: rgba(255, 255, 255, 0.03);
+      --shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: "DM Sans", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top, rgba(165, 148, 249, 0.16), transparent 30%),
+        radial-gradient(circle at 75% 25%, rgba(240, 200, 150, 0.08), transparent 18%),
+        linear-gradient(180deg, var(--bg2) 0%, var(--bg) 40%, #07070d 100%);
+      min-height: 100vh;
+      line-height: 1.6;
+      letter-spacing: -0.01em;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(circle at center, black 35%, transparent 85%);
+      opacity: 0.2;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      overflow: clip;
+    }
+
+    .container {
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .section {
+      padding: 100px 0;
+    }
+
+    .eyebrow {
+      margin: 0 0 18px;
+      color: var(--dim);
+      font-size: 0.85rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-family: "Instrument Serif", serif;
+      font-weight: 400;
+      letter-spacing: -0.03em;
+    }
+
+    p {
+      margin: 0;
+      color: var(--dim);
+      font-size: 1rem;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(26px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+      transition-delay: var(--delay, 0s);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 48px 0 72px;
+    }
+
+    .hero-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
+      align-items: center;
+      gap: 48px;
+    }
+
+    .brand-mark {
+      width: 80px;
+      height: 80px;
+      border-radius: 22px;
+      margin-bottom: 28px;
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.08),
+        0 0 45px rgba(165, 148, 249, 0.45),
+        0 20px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    .hero h1 {
+      font-size: clamp(4.25rem, 10vw, 7.4rem);
+      font-style: italic;
+      line-height: 0.92;
+      margin-bottom: 18px;
+    }
+
+    .tagline {
+      max-width: 28rem;
+      font-size: clamp(1.15rem, 2vw, 1.45rem);
+      color: var(--text);
+      margin-bottom: 34px;
+    }
+
+    .store-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      min-height: 60px;
+      padding: 13px 20px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+      box-shadow: 0 18px 35px rgba(0, 0, 0, 0.28);
+      transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .store-button:hover {
+      transform: translateY(-2px);
+      border-color: rgba(165, 148, 249, 0.4);
+      background: linear-gradient(180deg, rgba(165, 148, 249, 0.14), rgba(255, 255, 255, 0.04));
+    }
+
+    .store-button svg {
+      width: 24px;
+      height: 24px;
+      flex: 0 0 24px;
+      fill: currentColor;
+    }
+
+    .store-button small {
+      display: block;
+      color: var(--dim);
+      font-size: 0.72rem;
+      line-height: 1;
+      margin-bottom: 3px;
+      letter-spacing: 0.02em;
+    }
+
+    .store-button strong {
+      display: block;
+      font-size: 1.05rem;
+      line-height: 1.1;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .hero-visual {
+      display: grid;
+      place-items: center;
+      min-height: 460px;
+      position: relative;
+    }
+
+    .hero-visual::before,
+    .hero-visual::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(18px);
+    }
+
+    .hero-visual::before {
+      width: 280px;
+      height: 280px;
+      background: rgba(165, 148, 249, 0.16);
+    }
+
+    .hero-visual::after {
+      width: 160px;
+      height: 160px;
+      background: rgba(240, 200, 150, 0.14);
+      transform: translate(85px, 90px);
+    }
+
+    .breathing-wrap {
+      position: relative;
+      width: min(72vw, 360px);
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+    }
+
+    .breathing-wrap::before,
+    .breathing-wrap::after,
+    .breathing-ring,
+    .breathing-core {
+      border-radius: 50%;
+      position: absolute;
+      inset: 0;
+    }
+
+    .breathing-wrap::before {
+      content: "";
+      inset: 12%;
+      background: radial-gradient(circle, rgba(240, 200, 150, 0.18), rgba(165, 148, 249, 0.06) 60%, transparent 72%);
+      filter: blur(8px);
+    }
+
+    .breathing-wrap::after {
+      content: "";
+      inset: 28%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent 70%);
+    }
+
+    .breathing-ring {
+      border: 1.5px solid rgba(165, 148, 249, 0.85);
+      box-shadow:
+        0 0 0 1px rgba(165, 148, 249, 0.08),
+        0 0 50px rgba(165, 148, 249, 0.25),
+        inset 0 0 36px rgba(165, 148, 249, 0.08);
+      animation: breathe 6s ease-in-out infinite;
+    }
+
+    .breathing-core {
+      inset: 18%;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent 35%),
+        radial-gradient(circle, rgba(165, 148, 249, 0.32), rgba(15, 16, 40, 0.2) 58%, rgba(10, 10, 18, 0.06) 100%);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      animation: breathe-core 6s ease-in-out infinite;
+      box-shadow:
+        inset 0 0 40px rgba(255, 255, 255, 0.05),
+        0 10px 40px rgba(0, 0, 0, 0.28);
+    }
+
+    .breathing-text {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .breathing-text span {
+      display: block;
+    }
+
+    .breathing-text .top {
+      color: var(--dim);
+      font-size: 0.8rem;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .breathing-text .bottom {
+      font-family: "Instrument Serif", serif;
+      font-style: italic;
+      font-size: clamp(1.7rem, 4vw, 2.5rem);
+    }
+
+    .section-heading {
+      max-width: 650px;
+      margin: 0 auto 48px;
+      text-align: center;
+    }
+
+    .section-heading h2 {
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-style: italic;
+      margin-bottom: 14px;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 22px;
+    }
+
+    .card {
+      position: relative;
+      padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.025));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(165, 148, 249, 0.14), transparent 35%);
+      pointer-events: none;
+    }
+
+    .step-number {
+      display: inline-flex;
+      width: 42px;
+      height: 42px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      margin-bottom: 18px;
+      background: rgba(165, 148, 249, 0.14);
+      color: var(--accent);
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .card h3 {
+      font-size: 2rem;
+      font-style: italic;
+      margin-bottom: 10px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 22px;
+    }
+
+    .feature-card {
+      min-height: 200px;
+    }
+
+    .feature-card h3 {
+      font-size: 1.75rem;
+      margin-bottom: 12px;
+    }
+
+    .feature-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      color: var(--accent);
+      background: rgba(165, 148, 249, 0.1);
+      border: 1px solid rgba(165, 148, 249, 0.16);
+    }
+
+    .feature-icon svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.7;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .screenshot-frame {
+      width: min(100%, 360px);
+      margin: 0 auto;
+      padding: 14px;
+      border-radius: 38px;
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.025)),
+        linear-gradient(135deg, rgba(165, 148, 249, 0.08), rgba(240, 200, 150, 0.05));
+      box-shadow:
+        0 24px 70px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .screenshot-frame img {
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto;
+      border-radius: 28px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .quote-section {
+      position: relative;
+      text-align: center;
+    }
+
+    .quote-glow {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: min(70vw, 620px);
+      height: min(38vw, 260px);
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(240, 200, 150, 0.22), rgba(240, 200, 150, 0.08) 45%, transparent 70%);
+      filter: blur(18px);
+      pointer-events: none;
+    }
+
+    blockquote {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      font-family: "Instrument Serif", serif;
+      font-style: italic;
+      font-size: clamp(2.4rem, 5vw, 4.7rem);
+      line-height: 1.05;
+      letter-spacing: -0.035em;
+    }
+
+    .cta-box {
+      text-align: center;
+      padding: 54px 28px;
+      border-radius: 34px;
+      border: 1px solid var(--border);
+      background:
+        radial-gradient(circle at top, rgba(165, 148, 249, 0.16), transparent 42%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+      box-shadow: var(--shadow);
+    }
+
+    .cta-box h2 {
+      font-size: clamp(2.2rem, 4vw, 3.5rem);
+      font-style: italic;
+      margin-bottom: 14px;
+    }
+
+    .cta-box p {
+      margin: 0 auto 28px;
+      max-width: 34rem;
+      color: var(--text);
+    }
+
+    footer {
+      padding: 28px 0 42px;
+      color: var(--dim);
+      font-size: 0.95rem;
+    }
+
+    .footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-links {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a:hover {
+      color: var(--text);
+    }
+
+    @keyframes breathe {
+      0%, 100% {
+        transform: scale(0.88);
+        opacity: 0.72;
+      }
+      50% {
+        transform: scale(1.06);
+        opacity: 1;
+      }
+    }
+
+    @keyframes breathe-core {
+      0%, 100% {
+        transform: scale(0.94);
+      }
+      50% {
+        transform: scale(1.04);
+      }
+    }
+
+    @media (max-width: 920px) {
+      .section {
+        padding: 82px 0;
+      }
+
+      .hero {
+        min-height: auto;
+      }
+
+      .hero-layout,
+      .steps,
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-copy {
+        text-align: center;
+      }
+
+      .brand-mark,
+      .store-button {
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .tagline {
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .hero-visual {
+        min-height: 360px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        width: min(100% - 28px, 1120px);
+      }
+
+      .hero {
+        padding-top: 30px;
+      }
+
+      .card,
+      .cta-box {
+        padding: 24px;
+      }
+
+      .footer-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      blockquote {
+        font-size: clamp(2rem, 11vw, 3.2rem);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      .reveal,
+      .breathing-ring,
+      .breathing-core,
+      .store-button {
+        transition: none;
+        animation: none;
+      }
+
+      .reveal {
+        opacity: 1;
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <main>
+      <section class="hero">
+        <div class="container hero-layout">
+          <div class="hero-copy reveal">
+            <img class="brand-mark" src="app-icon.png" alt="thirty app icon">
+            <h1>thirty</h1>
+            <p class="tagline">30 seconds is all you need.</p>
+            <a class="store-button" href="#" aria-label="Download on the App Store">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M16.86 12.87c.03 2.94 2.58 3.92 2.61 3.93-.02.07-.4 1.38-1.31 2.73-.79 1.16-1.61 2.32-2.9 2.34-1.27.02-1.68-.75-3.14-.75s-1.92.73-3.11.77c-1.24.05-2.18-1.24-2.98-2.39-1.63-2.35-2.88-6.63-1.2-9.56.84-1.46 2.33-2.38 3.95-2.41 1.23-.02 2.39.83 3.14.83.75 0 2.15-1.03 3.62-.88.62.03 2.35.25 3.46 1.87-.09.05-2.07 1.21-2.04 3.52ZM14.88 5.2c.66-.8 1.1-1.92.98-3.03-.95.04-2.1.63-2.77 1.43-.61.7-1.14 1.84-.99 2.93 1.06.08 2.13-.54 2.78-1.33Z"/>
+              </svg>
+              <span>
+                <small>Download on the</small>
+                <strong>App Store</strong>
+              </span>
+            </a>
+          </div>
+
+          <div class="hero-visual reveal" style="--delay: 0.12s;">
+            <div class="breathing-wrap" aria-hidden="true">
+              <div class="breathing-ring"></div>
+              <div class="breathing-core"></div>
+              <div class="breathing-text">
+                <span class="top">inhale</span>
+                <span class="bottom">arrive softly</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-heading reveal">
+            <p class="eyebrow">How It Works</p>
+            <h2>A ritual small enough to keep.</h2>
+          </div>
+          <div class="steps">
+            <article class="card reveal">
+              <div class="step-number">01</div>
+              <h3>Open</h3>
+              <p>Start the app the moment your day feels loud. No setup, no friction, no menu maze.</p>
+            </article>
+            <article class="card reveal" style="--delay: 0.08s;">
+              <div class="step-number">02</div>
+              <h3>Breathe</h3>
+              <p>Follow a calm visual rhythm designed to settle your nervous system in under half a minute.</p>
+            </article>
+            <article class="card reveal" style="--delay: 0.16s;">
+              <div class="step-number">03</div>
+              <h3>Done</h3>
+              <p>Close the app and return clearer. thirty fits into real life because it respects your time.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-heading reveal">
+            <p class="eyebrow">Features</p>
+            <h2>Quiet details, carefully chosen.</h2>
+          </div>
+          <div class="features-grid">
+            <article class="card feature-card reveal">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M3 12h18"/><path d="M5.5 5.5c5 2 8 5 13 13"/></svg>
+              </div>
+              <h3>Breathing animation</h3>
+              <p>A soft visual guide keeps each inhale and exhale intuitive, even when your thoughts are scattered.</p>
+            </article>
+            <article class="card feature-card reveal" style="--delay: 0.05s;">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24"><path d="M3 14c2 0 2-4 4-4s2 8 4 8 2-12 4-12 2 8 4 8 2-2 2-2"/></svg>
+              </div>
+              <h3>Ocean audio</h3>
+              <p>Optional sound layers add a sense of space without turning the experience into background noise.</p>
+            </article>
+            <article class="card feature-card reveal" style="--delay: 0.1s;">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="9"/></svg>
+              </div>
+              <h3>Streak tracking</h3>
+              <p>Gentle progress cues help you return tomorrow without gamifying the calm out of the habit.</p>
+            </article>
+            <article class="card feature-card reveal" style="--delay: 0.15s;">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24"><path d="M4 8h16"/><path d="M6 4h12l2 4v12H4V8l2-4Z"/></svg>
+              </div>
+              <h3>Dark design</h3>
+              <p>Low-light visuals feel grounded at night and elegant during the day, with no clinical wellness gloss.</p>
+            </article>
+            <article class="card feature-card reveal" style="--delay: 0.2s;">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 2v20"/><path d="M7 7c0 2.5 2.2 4 5 4s5 1.5 5 4-2.2 4-5 4-5-1.5-5-4"/></svg>
+              </div>
+              <h3>Longer sessions</h3>
+              <p>Need more time? Extend beyond thirty seconds when a deeper pause makes more sense for the moment.</p>
+            </article>
+            <article class="card feature-card reveal" style="--delay: 0.25s;">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 1v22"/><path d="M17 5H9.5a2.5 2.5 0 0 0 0 5H14.5a2.5 2.5 0 0 1 0 5H6"/></svg>
+              </div>
+              <h3>One-time $4.99</h3>
+              <p>Pay once and keep the ritual. No subscription pressure, no trial countdown, no recurring interruptions.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-heading reveal">
+            <p class="eyebrow">Screenshot</p>
+            <h2>Calm, framed simply.</h2>
+          </div>
+          <div class="screenshot-frame reveal" style="--delay: 0.08s;">
+            <img src="/assets/screenshot.a31e4159.png" alt="thirty app screenshot">
+          </div>
+        </div>
+      </section>
+
+      <section class="section quote-section">
+        <div class="container">
+          <div class="quote-glow" aria-hidden="true"></div>
+          <blockquote class="reveal">“Sometimes thirty seconds is all you need.”</blockquote>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="cta-box reveal">
+            <p class="eyebrow">Download</p>
+            <h2>Keep stillness within reach.</h2>
+            <p>For the in-between moments, the overstimulated afternoons, and the nights that need a gentler close.</p>
+            <a class="store-button" href="#" aria-label="Download thirty on the App Store">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M16.86 12.87c.03 2.94 2.58 3.92 2.61 3.93-.02.07-.4 1.38-1.31 2.73-.79 1.16-1.61 2.32-2.9 2.34-1.27.02-1.68-.75-3.14-.75s-1.92.73-3.11.77c-1.24.05-2.18-1.24-2.98-2.39-1.63-2.35-2.88-6.63-1.2-9.56.84-1.46 2.33-2.38 3.95-2.41 1.23-.02 2.39.83 3.14.83.75 0 2.15-1.03 3.62-.88.62.03 2.35.25 3.46 1.87-.09.05-2.07 1.21-2.04 3.52ZM14.88 5.2c.66-.8 1.1-1.92.98-3.03-.95.04-2.1.63-2.77 1.43-.61.7-1.14 1.84-.99 2.93 1.06.08 2.13-.54 2.78-1.33Z"/>
+              </svg>
+              <span>
+                <small>Download on the</small>
+                <strong>App Store</strong>
+              </span>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container footer-row">
+        <div class="footer-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <span>|</span>
+          <a href="support.html">Support</a>
+        </div>
+        <div>&copy; 2026 thirty</div>
+        <div>Made with stillness.</div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.16,
+      rootMargin: '0px 0px -8% 0px'
+    });
+
+    document.querySelectorAll('.reveal').forEach((element) => {
+      observer.observe(element);
+    });
+  </script>
+</body>
+</html>

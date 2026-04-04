@@ -1,0 +1,1 @@
+{"name": "thirty-website","version": "1.0.0","description": "A meditation app for mindfulness and calm.","main": "index.js","scripts": {"start": "vite","build": "vite build"},"repository": {"type": "git","url": "git+https://your.repo.url.git"},"author": "Seth Miller","license": "MIT","dependencies": {"react": "^18.0.0","react-dom": "^18.0.0","vite": "^2.0.0"}}
