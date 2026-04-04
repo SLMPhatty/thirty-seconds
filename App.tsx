@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { LogBox } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
+import { ReducedMotionConfig } from 'react-native-reanimated';
 import { BackgroundOrbs } from './src/components/BackgroundOrbs';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { StartScreen } from './src/screens/StartScreen';
@@ -125,6 +126,7 @@ export default function App() {
   };
 
   return (
+    <ReducedMotionConfig mode="never">
     <View style={styles.container} onLayout={onLayoutRootView}>
       <StatusBar style="light" />
       <BackgroundOrbs />
@@ -172,6 +174,7 @@ export default function App() {
         />
       )}
     </View>
+    </ReducedMotionConfig>
   );
 }
 
