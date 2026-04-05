@@ -1,10 +1,15 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LogBox } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { ReducedMotionConfig } from 'react-native-reanimated';
+import { configureReanimatedLogger, ReduceMotion } from 'react-native-reanimated';
+
+// Disable reduced motion globally so animations always run on device
+try {
+  configureReanimatedLogger({ strict: false });
+} catch {}
 import { BackgroundOrbs } from './src/components/BackgroundOrbs';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { StartScreen } from './src/screens/StartScreen';
@@ -44,14 +49,40 @@ export default function App() {
     onboardingSeen: false,
   });
   const [firstSession, setFirstSession] = useState(true);
+  const [appReady, setAppReady] = useState(false);
   const { logSessionToHealthKit } = useHealthKit();
   const { refreshStreakProtection } = useStreakProtection();
+  const splashHidden = useRef(false);
 
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     InstrumentSerif: require('./assets/fonts/InstrumentSerif-Regular.ttf'),
     DMSans: require('./assets/fonts/DMSans-Regular.ttf'),
     DMSans_500Medium: require('./assets/fonts/DMSans-Medium.ttf'),
   });
+
+  // Mark app as ready when fonts load or fail
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      setAppReady(true);
+    }
+  }, [fontsLoaded, fontError]);
+
+  // Absolute safety net: force ready after 3 seconds no matter what
+  useEffect(() => {
+    const t = setTimeout(() => setAppReady(true), 3000);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Hide splash screen whenever app becomes ready
+  const hideSplash = useCallback(async () => {
+    if (splashHidden.current) return;
+    splashHidden.current = true;
+    try { await SplashScreen.hideAsync(); } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (appReady) hideSplash();
+  }, [appReady, hideSplash]);
 
   useEffect(() => {
     (async () => {
@@ -80,13 +111,8 @@ export default function App() {
     }
   }, [screen]);
 
-  const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded) {
-      await SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
-
-  if (!fontsLoaded) return null;
+  // Don't block render — show the app even if fonts failed
+  if (!appReady) return null;
 
   const handleOnboardingComplete = async () => {
     const updated = { ...prefs, onboardingSeen: true };
@@ -126,8 +152,8 @@ export default function App() {
   };
 
   return (
-    <ReducedMotionConfig mode="never">
-    <View style={styles.container} onLayout={onLayoutRootView}>
+    
+    <View style={styles.container} onLayout={hideSplash}>
       <StatusBar style="light" />
       <BackgroundOrbs />
 
@@ -174,7 +200,7 @@ export default function App() {
         />
       )}
     </View>
-    </ReducedMotionConfig>
+    
   );
 }
 
