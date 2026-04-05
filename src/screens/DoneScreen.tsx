@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Share } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { colors } from '../theme';
 import { getQuote } from '../utils/quotes';
@@ -59,10 +59,10 @@ export function DoneScreen({ onAgain, onUnlock }: Props) {
         <Text style={[styles.streakNum, milestone && styles.streakNumMilestone]}>{streak}</Text>
         {milestone ? (
           <>
-            <Animated.Text entering={FadeIn.duration(800)} style={styles.milestoneText}>
+            <Animated.Text entering={FadeIn.duration(800).reduceMotion(ReduceMotion.Never)} style={styles.milestoneText}>
               milestone reached
             </Animated.Text>
-            <Animated.Text entering={FadeIn.duration(900)} style={styles.milestoneSubtext}>
+            <Animated.Text entering={FadeIn.duration(900).reduceMotion(ReduceMotion.Never)} style={styles.milestoneSubtext}>
               {milestone}
             </Animated.Text>
           </>

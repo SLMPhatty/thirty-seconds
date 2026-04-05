@@ -9,7 +9,16 @@ import Animated, {
   withRepeat,
   withSequence,
   Easing,
+  ReduceMotion,
 } from 'react-native-reanimated';
+
+// Helper: wrap withTiming with ReduceMotion.Never baked in
+const wt = (toValue: number, config: { duration: number; easing: (t: number) => number }) =>
+  withTiming(toValue, { ...config, reduceMotion: ReduceMotion.Never });
+
+// Helper: wrap withRepeat with ReduceMotion.Never baked in
+const wr = (animation: any, reps: number, reverse: boolean) =>
+  withRepeat(animation, reps, reverse, undefined, ReduceMotion.Never);
 import { colors } from '../theme';
 import { PhaseConfig } from '../data/breathingPatterns';
 
@@ -83,28 +92,28 @@ export function BreathCircle({
       lastPhasesKey.current = '';
 
       ringScale.value = 0.88;
-      ringScale.value = withRepeat(
-        withTiming(0.92, { duration: IDLE_HALF_CYCLE, easing: ease }),
+      ringScale.value = wr(
+        wt(0.92, { duration: IDLE_HALF_CYCLE, easing: ease }),
         -1, true
       );
       coreScale.value = 0.94;
-      coreScale.value = withRepeat(
-        withTiming(0.97, { duration: IDLE_HALF_CYCLE, easing: ease }),
+      coreScale.value = wr(
+        wt(0.97, { duration: IDLE_HALF_CYCLE, easing: ease }),
         -1, true
       );
       ringOpacity.value = 0.72;
-      ringOpacity.value = withRepeat(
-        withTiming(0.85, { duration: IDLE_HALF_CYCLE, easing: ease }),
+      ringOpacity.value = wr(
+        wt(0.85, { duration: IDLE_HALF_CYCLE, easing: ease }),
         -1, true
       );
       haloOpacity.value = 0.4;
-      haloOpacity.value = withRepeat(
-        withTiming(0.6, { duration: IDLE_HALF_CYCLE, easing: ease }),
+      haloOpacity.value = wr(
+        wt(0.6, { duration: IDLE_HALF_CYCLE, easing: ease }),
         -1, true
       );
       colorPhase.value = 0;
-      colorPhase.value = withRepeat(
-        withTiming(0.3, { duration: IDLE_HALF_CYCLE, easing: ease }),
+      colorPhase.value = wr(
+        wt(0.3, { duration: IDLE_HALF_CYCLE, easing: ease }),
         -1, true
       );
     } else if (!started.current || lastPhasesKey.current !== phasesKey) {
@@ -120,28 +129,28 @@ export function BreathCircle({
         const inDur = phases[0].duration;
 
         ringScale.value = 0.88;
-        ringScale.value = withRepeat(
-          withTiming(1.06, { duration: inDur, easing: ease }),
+        ringScale.value = wr(
+          wt(1.06, { duration: inDur, easing: ease }),
           -1, true
         );
         coreScale.value = 0.94;
-        coreScale.value = withRepeat(
-          withTiming(1.04, { duration: inDur, easing: ease }),
+        coreScale.value = wr(
+          wt(1.04, { duration: inDur, easing: ease }),
           -1, true
         );
         ringOpacity.value = 0.72;
-        ringOpacity.value = withRepeat(
-          withTiming(1, { duration: inDur, easing: ease }),
+        ringOpacity.value = wr(
+          wt(1, { duration: inDur, easing: ease }),
           -1, true
         );
         haloOpacity.value = 0.4;
-        haloOpacity.value = withRepeat(
-          withTiming(0.8, { duration: inDur, easing: ease }),
+        haloOpacity.value = wr(
+          wt(0.8, { duration: inDur, easing: ease }),
           -1, true
         );
         colorPhase.value = 0;
-        colorPhase.value = withRepeat(
-          withTiming(1, { duration: inDur, easing: ease }),
+        colorPhase.value = wr(
+          wt(1, { duration: inDur, easing: ease }),
           -1, true
         );
       } else {
@@ -154,17 +163,17 @@ export function BreathCircle({
 
         for (const p of phases) {
           if (p.phase === 'in') {
-            ringSeq.push(withTiming(1.06, { duration: p.duration, easing: ease }));
-            coreSeq.push(withTiming(1.04, { duration: p.duration, easing: ease }));
-            opacitySeq.push(withTiming(1, { duration: p.duration, easing: ease }));
-            haloSeq.push(withTiming(0.8, { duration: p.duration, easing: ease }));
-            colorSeq.push(withTiming(1, { duration: p.duration, easing: ease }));
+            ringSeq.push(wt(1.06, { duration: p.duration, easing: ease }));
+            coreSeq.push(wt(1.04, { duration: p.duration, easing: ease }));
+            opacitySeq.push(wt(1, { duration: p.duration, easing: ease }));
+            haloSeq.push(wt(0.8, { duration: p.duration, easing: ease }));
+            colorSeq.push(wt(1, { duration: p.duration, easing: ease }));
           } else if (p.phase === 'out') {
-            ringSeq.push(withTiming(0.88, { duration: p.duration, easing: ease }));
-            coreSeq.push(withTiming(0.94, { duration: p.duration, easing: ease }));
-            opacitySeq.push(withTiming(0.72, { duration: p.duration, easing: ease }));
-            haloSeq.push(withTiming(0.4, { duration: p.duration, easing: ease }));
-            colorSeq.push(withTiming(0, { duration: p.duration, easing: ease }));
+            ringSeq.push(wt(0.88, { duration: p.duration, easing: ease }));
+            coreSeq.push(wt(0.94, { duration: p.duration, easing: ease }));
+            opacitySeq.push(wt(0.72, { duration: p.duration, easing: ease }));
+            haloSeq.push(wt(0.4, { duration: p.duration, easing: ease }));
+            colorSeq.push(wt(0, { duration: p.duration, easing: ease }));
           } else if (p.phase === 'hold') {
             const idx = phases.indexOf(p);
             const prev = idx > 0 ? phases[idx - 1].phase : 'in';
@@ -172,7 +181,7 @@ export function BreathCircle({
             coreSeq.push(withTiming(prev === 'in' ? 1.04 : 0.94, { duration: p.duration, easing: Easing.linear }));
             opacitySeq.push(withTiming(prev === 'in' ? 1 : 0.72, { duration: p.duration, easing: Easing.linear }));
             haloSeq.push(withTiming(prev === 'in' ? 0.8 : 0.4, { duration: p.duration, easing: Easing.linear }));
-            colorSeq.push(withTiming(0.5, { duration: p.duration, easing: Easing.linear }));
+            colorSeq.push(wt(0.5, { duration: p.duration, easing: Easing.linear }));
           }
         }
 
@@ -183,11 +192,11 @@ export function BreathCircle({
         haloOpacity.value = 0.4;
         colorPhase.value = 0;
 
-        ringScale.value = withRepeat(withSequence(...ringSeq), -1, false);
-        coreScale.value = withRepeat(withSequence(...coreSeq), -1, false);
-        ringOpacity.value = withRepeat(withSequence(...opacitySeq), -1, false);
-        haloOpacity.value = withRepeat(withSequence(...haloSeq), -1, false);
-        colorPhase.value = withRepeat(withSequence(...colorSeq), -1, false);
+        ringScale.value = wr(withSequence(...ringSeq), -1, false);
+        coreScale.value = wr(withSequence(...coreSeq), -1, false);
+        ringOpacity.value = wr(withSequence(...opacitySeq), -1, false);
+        haloOpacity.value = wr(withSequence(...haloSeq), -1, false);
+        colorPhase.value = wr(withSequence(...colorSeq), -1, false);
       }
     }
   }, [phase, phaseDuration, phases]);
@@ -196,24 +205,24 @@ export function BreathCircle({
   useEffect(() => {
     if (phase === 'hold') {
       pulseScale.value = 1;
-      pulseScale.value = withRepeat(
-        withTiming(1.02, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
+      pulseScale.value = wr(
+        wt(1.02, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
         -1, true,
       );
     } else {
-      pulseScale.value = withTiming(1, { duration: 300 });
+      pulseScale.value = wt(1, { duration: 300 });
     }
   }, [phase]);
 
   // Word fade on change
   useEffect(() => {
     wordOpacity.value = 0;
-    wordOpacity.value = withTiming(1, { duration: 400, easing: Easing.out(Easing.ease) });
+    wordOpacity.value = wt(1, { duration: 400, easing: Easing.out(Easing.ease) });
   }, [breathWord, wordOpacity]);
 
   // Final exhale golden glow
   useEffect(() => {
-    finalExhaleProgress.value = withTiming(isFinalExhale ? 1 : 0, {
+    finalExhaleProgress.value = withTiming(isFinalExhale ? 1 : 0, { reduceMotion: ReduceMotion.Never,
       duration: Math.min(phaseDuration, 1200),
       easing: Easing.inOut(Easing.ease),
     });

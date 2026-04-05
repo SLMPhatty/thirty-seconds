@@ -4,12 +4,8 @@ import { StatusBar } from 'expo-status-bar';
 import { LogBox } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { configureReanimatedLogger, ReduceMotion } from 'react-native-reanimated';
-
-// Disable reduced motion globally so animations always run on device
-try {
-  configureReanimatedLogger({ strict: false });
-} catch {}
+// NOTE: ReduceMotion.Never is applied per-animation instead of using
+// ReducedMotionConfig wrapper (which crashes in Hermes Release builds)
 import { BackgroundOrbs } from './src/components/BackgroundOrbs';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { StartScreen } from './src/screens/StartScreen';

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, ReduceMotion } from 'react-native-reanimated';
 import { colors } from '../theme';
 
 interface Props {
@@ -39,7 +39,7 @@ export function OnboardingScreen({ onComplete }: Props) {
     >
       <Animated.View
         key={index}
-        entering={FadeIn.duration(600)}
+        entering={FadeIn.duration(600).reduceMotion(ReduceMotion.Never)}
         style={styles.content}
       >
         <Text style={styles.title}>{slide.title}</Text>

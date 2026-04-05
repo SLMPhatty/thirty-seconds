@@ -7,6 +7,7 @@ import Animated, {
   withTiming,
   Easing,
   interpolate,
+  ReduceMotion,
 } from 'react-native-reanimated';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
@@ -19,9 +20,11 @@ export function BackgroundOrbs() {
 
   useEffect(() => {
     breath.value = withRepeat(
-      withTiming(1, { duration: BREATH_DURATION, easing: Easing.inOut(Easing.ease) }),
+      withTiming(1, { duration: BREATH_DURATION, easing: Easing.inOut(Easing.ease), reduceMotion: ReduceMotion.Never }),
       -1,
-      true // reverse — smoothly goes 0→1→0 with no skip
+      true, // reverse — smoothly goes 0→1→0 with no skip
+      undefined,
+      ReduceMotion.Never,
     );
   }, []);
 

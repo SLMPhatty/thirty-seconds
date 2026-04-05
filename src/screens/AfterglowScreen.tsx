@@ -5,6 +5,7 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
   Easing,
+  ReduceMotion,
 } from 'react-native-reanimated';
 import { colors, fonts } from '../theme';
 
@@ -20,10 +21,10 @@ export function AfterglowScreen({ onComplete }: Props) {
   const opacity = useSharedValue(0);
 
   useEffect(() => {
-    opacity.value = withTiming(1, { duration: FADE_IN, easing: Easing.out(Easing.ease) });
+    opacity.value = withTiming(1, { duration: FADE_IN, easing: Easing.out(Easing.ease), reduceMotion: ReduceMotion.Never });
 
     const fadeOutTimer = setTimeout(() => {
-      opacity.value = withTiming(0, { duration: FADE_OUT, easing: Easing.in(Easing.ease) });
+      opacity.value = withTiming(0, { duration: FADE_OUT, easing: Easing.in(Easing.ease), reduceMotion: ReduceMotion.Never });
     }, FADE_IN + HOLD);
 
     const navTimer = setTimeout(onComplete, FADE_IN + HOLD + FADE_OUT + 50);
