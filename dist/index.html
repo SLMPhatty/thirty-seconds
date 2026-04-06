@@ -8,15 +8,36 @@
   <meta name="keywords" content="thirty, meditation app, breathing app, mindfulness, calm, wellness">
   <meta name="theme-color" content="#0a0a12">
   <meta property="og:title" content="thirty | 30 seconds is all you need.">
-  <meta property="og:description" content="A luxury-feeling meditation app for a moment of stillness in just thirty seconds.">
+  <meta property="og:description" content="A physician-built meditation app. Open, breathe, return to your day in 30 seconds. $4.99 lifetime — no subscription.">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="app-icon.png">
-  <meta property="og:url" content="#">
+  <meta property="og:url" content="https://thirty-website.vercel.app">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="thirty | 30 seconds is all you need.">
-  <meta name="twitter:description" content="Open, breathe, and be done in thirty seconds.">
-  <meta name="twitter:image" content="app-icon.png">
+  <meta name="twitter:description" content="A physician-built meditation app. Open, breathe, return to your day in 30 seconds.">
+  <link rel="canonical" href="https://thirty-website.vercel.app">
   <link rel="icon" type="image/png" href="app-icon.png">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "thirty",
+    "description": "A physician-built meditation app. 30 seconds of calm — open, breathe, return to your day.",
+    "applicationCategory": "HealthApplication",
+    "operatingSystem": "iOS",
+    "url": "https://thirty-website.vercel.app",
+    "author": {
+      "@type": "Person",
+      "name": "Dr. Seth Miller",
+      "jobTitle": "General Practitioner"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "4.99",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock"
+    }
+  }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
@@ -506,6 +527,114 @@
       color: var(--text);
     }
 
+    /* Navigation */
+    .nav {
+      padding: 20px 0;
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-brand {
+      font-family: "Instrument Serif", serif;
+      font-style: italic;
+      font-size: 1.4rem;
+    }
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      font-size: 0.9rem;
+    }
+    .nav-links a {
+      color: var(--dim);
+      transition: color 0.2s;
+    }
+    .nav-links a:hover {
+      color: var(--text);
+    }
+    .nav-links .highlight {
+      color: var(--accent);
+    }
+    .nav-links .highlight:hover {
+      color: var(--warm);
+    }
+
+    /* Doctor Section */
+    .doctor-section {
+      padding: 100px 0;
+    }
+    .doctor-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .doctor-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(165, 148, 249, 0.3);
+      background: rgba(165, 148, 249, 0.08);
+      color: var(--accent);
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 24px;
+    }
+    .doctor-section blockquote {
+      font-family: "Instrument Serif", serif;
+      font-style: italic;
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      line-height: 1.25;
+      color: var(--text);
+      margin: 0 0 20px;
+    }
+    .doctor-section .attribution {
+      font-size: 0.95rem;
+      color: var(--dim);
+    }
+    .doctor-section .attribution strong {
+      color: var(--accent);
+    }
+
+    /* Healthcare CTA Banner */
+    .healthcare-banner {
+      padding: 32px 28px;
+      border-radius: 24px;
+      border: 1px solid rgba(110, 207, 207, 0.2);
+      background: linear-gradient(135deg, rgba(110, 207, 207, 0.06), rgba(165, 148, 249, 0.04));
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .healthcare-banner-icon {
+      font-size: 2.4rem;
+      flex-shrink: 0;
+    }
+    .healthcare-banner h3 {
+      font-size: 1.3rem;
+      font-style: italic;
+      margin-bottom: 6px;
+    }
+    .healthcare-banner p {
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+    .healthcare-banner .link {
+      color: #6ecfcf;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .healthcare-banner .link:hover {
+      text-decoration: underline;
+    }
+
     @keyframes breathe {
       0%, 100% {
         transform: scale(0.88);
@@ -607,6 +736,16 @@
 </head>
 <body>
   <div class="page">
+    <nav class="nav">
+      <div class="container nav-inner">
+        <a href="index.html" class="nav-brand">thirty</a>
+        <div class="nav-links">
+          <a href="healthcare.html" class="highlight">For Healthcare Workers</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="support.html">Support</a>
+        </div>
+      </div>
+    </nav>
     <main>
       <section class="hero">
         <div class="container hero-layout">
@@ -729,10 +868,33 @@
         </div>
       </section>
 
+      <section class="doctor-section">
+        <div class="container">
+          <div class="doctor-inner reveal">
+            <div class="doctor-badge">🩺 Built by a physician</div>
+            <blockquote>"I built thirty because I needed it. Between patients, in my car before walking into the house after a long day. Every meditation app wanted 20 minutes I didn't have. I needed 30 seconds that actually worked."</blockquote>
+            <p class="attribution"><strong>Dr. Seth Miller</strong> · General Practitioner · Builder of thirty</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="healthcare-banner reveal">
+            <div class="healthcare-banner-icon">🏥</div>
+            <div>
+              <h3>Healthcare worker?</h3>
+              <p>thirty was designed for the chaos of clinical life. See how it fits between patients, during night shifts, and in the moments you need it most.</p>
+              <a href="healthcare.html" class="link">thirty for Healthcare Workers →</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section class="section quote-section">
         <div class="container">
           <div class="quote-glow" aria-hidden="true"></div>
-          <blockquote class="reveal">“Sometimes thirty seconds is all you need.”</blockquote>
+          <blockquote class="reveal">"Sometimes thirty seconds is all you need."</blockquote>
         </div>
       </section>
 
@@ -759,6 +921,8 @@
     <footer>
       <div class="container footer-row">
         <div class="footer-links">
+          <a href="healthcare.html">For Healthcare Workers</a>
+          <span>|</span>
           <a href="privacy.html">Privacy Policy</a>
           <span>|</span>
           <a href="support.html">Support</a>

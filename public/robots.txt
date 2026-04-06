@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://thirty-website.vercel.app/sitemap.xml

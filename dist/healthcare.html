@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>thirty for Healthcare Workers | Meditation Built by a Doctor, for Doctors</title>
+  <meta name="description" content="A meditation app built by a physician who understands clinical burnout, shift stress, and compassion fatigue. 30 seconds between patients. No fluff. Just calm.">
+  <meta name="keywords" content="meditation for doctors, healthcare worker meditation, physician burnout, nurse meditation, clinical burnout app, doctor wellness, shift stress meditation, compassion fatigue, medical professional mindfulness">
+  <meta name="theme-color" content="#0a0a12">
+  <meta property="og:title" content="thirty for Healthcare Workers — Built by a Doctor, for Doctors">
+  <meta property="og:description" content="A meditation app built by a physician who understands clinical burnout. 30 seconds between patients. No fluff. Just calm.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://thirty-website.vercel.app/healthcare.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="thirty for Healthcare Workers — Built by a Doctor">
+  <meta name="twitter:description" content="30-second meditation designed for the chaos of clinical life. Built by a GP who lives it.">
+  <link rel="canonical" href="https://thirty-website.vercel.app/healthcare.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "thirty for Healthcare Workers",
+    "description": "A meditation app built by a physician for healthcare professionals dealing with burnout, shift stress, and compassion fatigue.",
+    "url": "https://thirty-website.vercel.app/healthcare.html",
+    "author": {
+      "@type": "Person",
+      "name": "Dr. Seth Miller",
+      "jobTitle": "General Practitioner"
+    },
+    "mainEntity": {
+      "@type": "SoftwareApplication",
+      "name": "thirty",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "iOS",
+      "offers": {
+        "@type": "Offer",
+        "price": "4.99",
+        "priceCurrency": "USD"
+      }
+    }
+  }
+  </script>
+  <style>
+    :root {
+      --bg: #0a0a12;
+      --bg2: #0f1028;
+      --text: #e8e4df;
+      --dim: rgba(232, 228, 223, 0.5);
+      --accent: #a594f9;
+      --warm: #f0c896;
+      --teal: #6ecfcf;
+      --border: rgba(232, 228, 223, 0.12);
+      --surface: rgba(255, 255, 255, 0.03);
+      --shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: "DM Sans", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top, rgba(110, 207, 207, 0.12), transparent 30%),
+        radial-gradient(circle at 75% 25%, rgba(165, 148, 249, 0.08), transparent 18%),
+        linear-gradient(180deg, var(--bg2) 0%, var(--bg) 40%, #07070d 100%);
+      min-height: 100vh;
+      line-height: 1.6;
+      letter-spacing: -0.01em;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(circle at center, black 35%, transparent 85%);
+      opacity: 0.2;
+    }
+
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    .container { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+    .section { padding: 100px 0; }
+    .eyebrow { margin: 0 0 18px; color: var(--dim); font-size: 0.85rem; letter-spacing: 0.24em; text-transform: uppercase; }
+    h1, h2, h3 { margin: 0; font-family: "Instrument Serif", serif; font-weight: 400; letter-spacing: -0.03em; }
+    p { margin: 0; color: var(--dim); font-size: 1rem; }
+
+    .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.8s ease, transform 0.8s ease; transition-delay: var(--delay, 0s); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* Nav */
+    .nav { padding: 20px 0; }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; }
+    .nav-brand { font-family: "Instrument Serif", serif; font-style: italic; font-size: 1.4rem; }
+    .nav-links { display: flex; gap: 24px; font-size: 0.9rem; }
+    .nav-links a { color: var(--dim); transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+
+    /* Hero */
+    .hero { padding: 80px 0 100px; text-align: center; }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(110, 207, 207, 0.3);
+      background: rgba(110, 207, 207, 0.08);
+      color: var(--teal);
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 32px;
+    }
+    .hero h1 {
+      font-size: clamp(3rem, 8vw, 5.5rem);
+      font-style: italic;
+      line-height: 1;
+      margin-bottom: 24px;
+    }
+    .hero h1 em { color: var(--teal); font-style: italic; }
+    .hero-sub {
+      max-width: 640px;
+      margin: 0 auto 20px;
+      font-size: clamp(1.1rem, 2vw, 1.35rem);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .hero-author {
+      font-size: 0.95rem;
+      color: var(--dim);
+      margin-bottom: 40px;
+    }
+    .hero-author strong { color: var(--teal); }
+
+    .store-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      min-height: 60px;
+      padding: 13px 20px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+      box-shadow: 0 18px 35px rgba(0, 0, 0, 0.28);
+      transition: transform 0.25s ease, border-color 0.25s ease;
+      backdrop-filter: blur(12px);
+    }
+    .store-button:hover { transform: translateY(-2px); border-color: rgba(110, 207, 207, 0.4); }
+    .store-button svg { width: 24px; height: 24px; flex: 0 0 24px; fill: currentColor; }
+    .store-button small { display: block; color: var(--dim); font-size: 0.72rem; line-height: 1; margin-bottom: 3px; }
+    .store-button strong { display: block; font-size: 1.05rem; line-height: 1.1; font-weight: 500; }
+
+    /* Problem Section */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 22px;
+      margin-top: 48px;
+    }
+
+    .stat-card {
+      padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
+    }
+    .stat-card .number {
+      font-family: "Instrument Serif", serif;
+      font-size: 3rem;
+      font-style: italic;
+      color: var(--teal);
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+    .stat-card h3 { font-size: 1.3rem; margin-bottom: 8px; }
+
+    /* Scenarios */
+    .scenarios {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 22px;
+      margin-top: 48px;
+    }
+    .scenario-card {
+      padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
+      position: relative;
+      overflow: hidden;
+    }
+    .scenario-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(110, 207, 207, 0.1), transparent 40%);
+      pointer-events: none;
+    }
+    .scenario-emoji { font-size: 2rem; margin-bottom: 14px; }
+    .scenario-card h3 { font-size: 1.5rem; font-style: italic; margin-bottom: 10px; }
+    .scenario-time {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(110, 207, 207, 0.1);
+      color: var(--teal);
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    /* Why Section */
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+      margin-top: 48px;
+    }
+    .why-card {
+      padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
+    }
+    .why-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 16px;
+      color: var(--teal);
+      background: rgba(110, 207, 207, 0.1);
+      border: 1px solid rgba(110, 207, 207, 0.16);
+      font-size: 1.3rem;
+    }
+    .why-card h3 { font-size: 1.4rem; font-style: italic; margin-bottom: 8px; }
+
+    /* Doctor Section */
+    .doctor-section {
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .doctor-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 999px;
+      border: 1px solid rgba(110, 207, 207, 0.25);
+      background: rgba(110, 207, 207, 0.06);
+      margin-bottom: 24px;
+    }
+    .doctor-badge span { font-size: 0.9rem; color: var(--teal); font-weight: 500; }
+    .doctor-section blockquote {
+      font-family: "Instrument Serif", serif;
+      font-style: italic;
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      line-height: 1.2;
+      color: var(--text);
+      margin: 0 0 24px;
+    }
+    .doctor-section .attribution {
+      font-size: 1rem;
+      color: var(--dim);
+    }
+    .doctor-section .attribution strong { color: var(--teal); }
+
+    /* CTA */
+    .cta-box {
+      text-align: center;
+      padding: 54px 28px;
+      border-radius: 34px;
+      border: 1px solid var(--border);
+      background:
+        radial-gradient(circle at top, rgba(110, 207, 207, 0.14), transparent 42%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+      box-shadow: var(--shadow);
+    }
+    .cta-box h2 { font-size: clamp(2.2rem, 4vw, 3.5rem); font-style: italic; margin-bottom: 14px; }
+    .cta-box p { margin: 0 auto 28px; max-width: 34rem; color: var(--text); }
+    .cta-price {
+      display: block;
+      margin-top: 16px;
+      font-size: 0.9rem;
+      color: var(--dim);
+    }
+
+    /* Footer */
+    footer { padding: 28px 0 42px; color: var(--dim); font-size: 0.95rem; }
+    .footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+    }
+    .footer-links { display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .footer-links a:hover { color: var(--text); }
+
+    /* Responsive */
+    @media (max-width: 920px) {
+      .section { padding: 72px 0; }
+      .problem-grid, .why-grid { grid-template-columns: 1fr; }
+      .scenarios { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .container { width: min(100% - 28px, 1120px); }
+      .footer-row { flex-direction: column; align-items: flex-start; }
+      .nav-links { gap: 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .reveal { transition: none; animation: none; opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-brand">thirty</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="support.html">Support</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="reveal">
+          <div class="hero-badge">🩺 Built by a physician who gets it</div>
+          <h1>Meditation for<br><em>healthcare workers</em></h1>
+          <p class="hero-sub">You give everyone else 30 minutes of your time. Give yourself 30 seconds.</p>
+          <p class="hero-author">Created by <strong>Dr. Seth Miller</strong>, a practicing GP who built this for himself first — then realized every clinician needs it.</p>
+          <a class="store-button" href="#" aria-label="Download on the App Store">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M16.86 12.87c.03 2.94 2.58 3.92 2.61 3.93-.02.07-.4 1.38-1.31 2.73-.79 1.16-1.61 2.32-2.9 2.34-1.27.02-1.68-.75-3.14-.75s-1.92.73-3.11.77c-1.24.05-2.18-1.24-2.98-2.39-1.63-2.35-2.88-6.63-1.2-9.56.84-1.46 2.33-2.38 3.95-2.41 1.23-.02 2.39.83 3.14.83.75 0 2.15-1.03 3.62-.88.62.03 2.35.25 3.46 1.87-.09.05-2.07 1.21-2.04 3.52ZM14.88 5.2c.66-.8 1.1-1.92.98-3.03-.95.04-2.1.63-2.77 1.43-.61.7-1.14 1.84-.99 2.93 1.06.08 2.13-.54 2.78-1.33Z"/>
+            </svg>
+            <span>
+              <small>Download on the</small>
+              <strong>App Store</strong>
+            </span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-heading reveal" style="text-align: center; max-width: 650px; margin: 0 auto 0;">
+          <p class="eyebrow">The Problem</p>
+          <h2 style="font-size: clamp(2.4rem, 5vw, 3.6rem); font-style: italic; margin-bottom: 14px;">Burnout isn't a personal failure.<br>It's a systems problem.</h2>
+          <p style="font-size: 1.1rem;">You don't have 20 minutes between patients. You barely have 2. Every meditation app on the market was built for people with yoga mats and open afternoons. You need something that works in the time you actually have.</p>
+        </div>
+        <div class="problem-grid">
+          <div class="stat-card reveal">
+            <div class="number">63%</div>
+            <h3>of physicians report burnout</h3>
+            <p>The highest rate ever recorded. It's not getting better on its own.</p>
+          </div>
+          <div class="stat-card reveal" style="--delay: 0.08s;">
+            <div class="number">46%</div>
+            <h3>of nurses plan to leave</h3>
+            <p>Nearly half of nurses intend to leave their role by 2027. Emotional exhaustion is the #1 reason.</p>
+          </div>
+          <div class="stat-card reveal" style="--delay: 0.12s;">
+            <div class="number">2 min</div>
+            <h3>is what you actually have</h3>
+            <p>Between patients, between rounds, between crises. That's the real window — not the 20 minutes other apps promise.</p>
+          </div>
+          <div class="stat-card reveal" style="--delay: 0.16s;">
+            <div class="number">$4.99</div>
+            <h3>one time, forever</h3>
+            <p>No subscription. No trial countdown. No wellness app charging you $70/year to breathe.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div style="text-align: center; max-width: 650px; margin: 0 auto;" class="reveal">
+          <p class="eyebrow">When to Use It</p>
+          <h2 style="font-size: clamp(2.4rem, 5vw, 3.6rem); font-style: italic; margin-bottom: 14px;">thirty fits where other apps can't.</h2>
+          <p style="font-size: 1.1rem;">Real scenarios from real clinical days. No retreats required.</p>
+        </div>
+        <div class="scenarios">
+          <div class="scenario-card reveal">
+            <div class="scenario-emoji">🏥</div>
+            <span class="scenario-time">30 seconds</span>
+            <h3>Between patients</h3>
+            <p>You just delivered bad news. The next patient is waiting. Take 30 seconds to reset before you walk into the next room carrying someone else's grief.</p>
+          </div>
+          <div class="scenario-card reveal" style="--delay: 0.08s;">
+            <div class="scenario-emoji">🌙</div>
+            <span class="scenario-time">60 seconds</span>
+            <h3>Mid-shift wind-down</h3>
+            <p>It's 2 AM on a night shift. Your body is exhausted but your mind won't stop replaying the code from earlier. One minute to let it go.</p>
+          </div>
+          <div class="scenario-card reveal" style="--delay: 0.12s;">
+            <div class="scenario-emoji">🚗</div>
+            <span class="scenario-time">30 seconds</span>
+            <h3>Before you walk in the door</h3>
+            <p>You've been carrying other people's pain all day. Your family deserves the version of you that showed up — not the one that's still at the hospital.</p>
+          </div>
+          <div class="scenario-card reveal" style="--delay: 0.16s;">
+            <div class="scenario-emoji">😔</div>
+            <span class="scenario-time">2 minutes</span>
+            <h3>Compassion fatigue reset</h3>
+            <p>You know you should still care. You do care. You're just tired. A longer session when you need to reconnect with why you started.</p>
+          </div>
+          <div class="scenario-card reveal" style="--delay: 0.2s;">
+            <div class="scenario-emoji">📋</div>
+            <span class="scenario-time">30 seconds</span>
+            <h3>Pre-procedure centering</h3>
+            <p>Before the scalpel, before the difficult conversation, before the family meeting. Arrive focused, not frazzled.</p>
+          </div>
+          <div class="scenario-card reveal" style="--delay: 0.24s;">
+            <div class="scenario-emoji">🛏️</div>
+            <span class="scenario-time">5 minutes</span>
+            <h3>Post-shift decompression</h3>
+            <p>The shift is over but your nervous system doesn't know it yet. A longer session to help your body catch up to the fact that you're safe now.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div style="text-align: center; max-width: 650px; margin: 0 auto;" class="reveal">
+          <p class="eyebrow">Why thirty</p>
+          <h2 style="font-size: clamp(2.4rem, 5vw, 3.6rem); font-style: italic; margin-bottom: 14px;">Built for your reality, not a wellness fantasy.</h2>
+        </div>
+        <div class="why-grid">
+          <div class="why-card reveal">
+            <div class="why-icon">⚡</div>
+            <h3>Instant start</h3>
+            <p>Open the app. Breathe. Done. No login screens, no daily affirmation pop-ups, no "how are you feeling today" surveys. You don't have time for that.</p>
+          </div>
+          <div class="why-card reveal" style="--delay: 0.06s;">
+            <div class="why-icon">🔇</div>
+            <h3>Works silent</h3>
+            <p>Visual breathing guide works without sound. Use it in the break room, the hallway, or between charts without anyone knowing.</p>
+          </div>
+          <div class="why-card reveal" style="--delay: 0.12s;">
+            <div class="why-icon">🌊</div>
+            <h3>Optional audio</h3>
+            <p>Ocean sounds and white noise when you have earbuds. The breathing animation when you don't. It adapts to your moment.</p>
+          </div>
+          <div class="why-card reveal" style="--delay: 0.18s;">
+            <div class="why-icon">🌑</div>
+            <h3>Dark by default</h3>
+            <p>Low-light design doesn't flash bright screens in dark call rooms or during night shifts. Your eyes have been through enough today.</p>
+          </div>
+          <div class="why-card reveal" style="--delay: 0.24s;">
+            <div class="why-icon">📵</div>
+            <h3>Zero data collection</h3>
+            <p>No analytics. No tracking. No HIPAA gray areas. Your meditation habit is nobody's business — not ours, not your employer's.</p>
+          </div>
+          <div class="why-card reveal" style="--delay: 0.3s;">
+            <div class="why-icon">💰</div>
+            <h3>$4.99. Forever.</h3>
+            <p>One coffee. Lifetime access. We're not going to charge you $70/year for the privilege of breathing. That's not the kind of physicians we are.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="doctor-section reveal">
+          <div class="doctor-badge">
+            <span>🩺 From the developer</span>
+          </div>
+          <blockquote>"I built thirty because I needed it. Between patients, between meetings, in my car before walking into the house after a long day. Every meditation app wanted 20 minutes I didn't have. I needed 30 seconds that actually worked. So I built it — for myself first, then for everyone like me."</blockquote>
+          <p class="attribution"><strong>Dr. Seth Miller</strong> · General Practitioner · Builder of thirty</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="cta-box reveal">
+          <p class="eyebrow">Download</p>
+          <h2>You take care of everyone else.<br>Take 30 seconds for yourself.</h2>
+          <p>No subscription. No guilt. No wellness influencer telling you to journal at 5 AM. Just 30 seconds of calm when you need it most.</p>
+          <a class="store-button" href="#" aria-label="Download thirty on the App Store">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M16.86 12.87c.03 2.94 2.58 3.92 2.61 3.93-.02.07-.4 1.38-1.31 2.73-.79 1.16-1.61 2.32-2.9 2.34-1.27.02-1.68-.75-3.14-.75s-1.92.73-3.11.77c-1.24.05-2.18-1.24-2.98-2.39-1.63-2.35-2.88-6.63-1.2-9.56.84-1.46 2.33-2.38 3.95-2.41 1.23-.02 2.39.83 3.14.83.75 0 2.15-1.03 3.62-.88.62.03 2.35.25 3.46 1.87-.09.05-2.07 1.21-2.04 3.52ZM14.88 5.2c.66-.8 1.1-1.92.98-3.03-.95.04-2.1.63-2.77 1.43-.61.7-1.14 1.84-.99 2.93 1.06.08 2.13-.54 2.78-1.33Z"/>
+            </svg>
+            <span>
+              <small>Download on the</small>
+              <strong>App Store</strong>
+            </span>
+          </a>
+          <span class="cta-price">$4.99 one time · No subscription · No tracking</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-row">
+      <div class="footer-links">
+        <a href="index.html">Home</a>
+        <span>|</span>
+        <a href="privacy.html">Privacy Policy</a>
+        <span>|</span>
+        <a href="support.html">Support</a>
+      </div>
+      <div>&copy; 2026 thirty</div>
+      <div>Made with stillness.</div>
+    </div>
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.16, rootMargin: '0px 0px -8% 0px' });
+    document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+  </script>
+</body>
+</html>
