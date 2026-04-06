@@ -1,46 +1,75 @@
-import { Audio } from 'expo-av';
+import {
+  createAudioPlayer,
+  setAudioModeAsync,
+  type AudioPlayer,
+  type AudioSource,
+  type AudioStatus,
+} from 'expo-audio';
 import { useRef, useCallback } from 'react';
 
 export function useAudio() {
-  const soundsRef = useRef<Audio.Sound[]>([]);
+  const soundsRef = useRef<AudioPlayer[]>([]);
 
-  const playAsset = useCallback(async (asset: any, volume = 1.0) => {
+  const configureAudioMode = useCallback(async () => {
     try {
-      const { sound } = await Audio.Sound.createAsync(asset, { volume });
-      soundsRef.current.push(sound);
-      await sound.playAsync();
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded && status.didJustFinish) {
-          sound.unloadAsync();
-          soundsRef.current = soundsRef.current.filter((s) => s !== sound);
-        }
+      await setAudioModeAsync({
+        allowsRecording: false,
+        interruptionMode: 'mixWithOthers',
+        playsInSilentMode: true,
+        shouldPlayInBackground: false,
+        shouldRouteThroughEarpiece: false,
       });
-    } catch (e) {
+    } catch {
       // silently fail — audio is optional
     }
   }, []);
 
-  const playLoop = useCallback(async (asset: any, volume = 1.0): Promise<Audio.Sound | null> => {
+  const playAsset = useCallback(async (asset: AudioSource, volume = 1.0) => {
     try {
-      const { sound } = await Audio.Sound.createAsync(asset, {
-        volume,
-        isLooping: true,
+      await configureAudioMode();
+      const sound = createAudioPlayer(asset, {
+        keepAudioSessionActive: true,
+        updateInterval: 100,
       });
+      sound.volume = volume;
       soundsRef.current.push(sound);
-      await sound.playAsync();
+      const subscription = sound.addListener('playbackStatusUpdate', (status: AudioStatus) => {
+        if (status.isLoaded && status.didJustFinish) {
+          subscription.remove();
+          sound.remove();
+          soundsRef.current = soundsRef.current.filter((s) => s !== sound);
+        }
+      });
+      sound.play();
+    } catch (e) {
+      // silently fail — audio is optional
+    }
+  }, [configureAudioMode]);
+
+  const playLoop = useCallback(async (asset: AudioSource, volume = 1.0): Promise<AudioPlayer | null> => {
+    try {
+      await configureAudioMode();
+      const sound = createAudioPlayer(asset, {
+        keepAudioSessionActive: true,
+        updateInterval: 100,
+      });
+      sound.volume = volume;
+      sound.loop = true;
+      soundsRef.current.push(sound);
+      sound.play();
       return sound;
     } catch {
       return null;
     }
-  }, []);
+  }, [configureAudioMode]);
 
   const stopAll = useCallback(async () => {
     const sounds = [...soundsRef.current];
     soundsRef.current = [];
     for (const s of sounds) {
       try {
-        await s.stopAsync();
-        await s.unloadAsync();
+        s.pause();
+        s.remove();
       } catch {}
     }
   }, []);

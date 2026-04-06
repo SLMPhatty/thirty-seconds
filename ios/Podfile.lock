@@ -1,9 +1,6 @@
 PODS:
   - EXApplication (55.0.12):
     - ExpoModulesCore
-  - EXAV (15.1.7):
-    - ExpoModulesCore
-    - ReactCommon/turbomodule/core
   - EXConstants (55.0.11):
     - ExpoModulesCore
   - Expo (55.0.11):
@@ -32,6 +29,8 @@ PODS:
     - ReactNativeDependencies
     - Yoga
   - ExpoAsset (55.0.12):
+    - ExpoModulesCore
+  - ExpoAudio (55.0.11):
     - ExpoModulesCore
   - ExpoDomWebView (55.0.5):
     - ExpoModulesCore
@@ -2082,10 +2081,10 @@ PODS:
 
 DEPENDENCIES:
   - EXApplication (from `../node_modules/expo-application/ios`)
-  - EXAV (from `../node_modules/expo-av/ios`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
   - Expo (from `../node_modules/expo`)
   - ExpoAsset (from `../node_modules/expo-asset/ios`)
+  - ExpoAudio (from `../node_modules/expo-audio/ios`)
   - "ExpoDomWebView (from `../node_modules/@expo/dom-webview/ios`)"
   - ExpoFileSystem (from `../node_modules/expo-file-system/ios`)
   - ExpoFont (from `../node_modules/expo-font/ios`)
@@ -2184,14 +2183,14 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   EXApplication:
     :path: "../node_modules/expo-application/ios"
-  EXAV:
-    :path: "../node_modules/expo-av/ios"
   EXConstants:
     :path: "../node_modules/expo-constants/ios"
   Expo:
     :path: "../node_modules/expo"
   ExpoAsset:
     :path: "../node_modules/expo-asset/ios"
+  ExpoAudio:
+    :path: "../node_modules/expo-audio/ios"
   ExpoDomWebView:
     :path: "../node_modules/@expo/dom-webview/ios"
   ExpoFileSystem:
@@ -2374,10 +2373,10 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   EXApplication: 4c1984dfe22040aff943d5ee3711420d2b447237
-  EXAV: c3071458428875a98cce024832c0bfd72b758f03
   EXConstants: 9813b8a316e5b7bb562731c7a45e236f54195185
   Expo: f298f7cafc2bfeb81997ddeae502ce98a672ae7f
   ExpoAsset: 63f22b029eb9aa68d5048f77ff9430f42c770d2c
+  ExpoAudio: 0de9d744a2255359f09feeb012656ae25bed30f3
   ExpoDomWebView: 2b2fbd9a07de8790569257cbf9dfdaa31cf95c70
   ExpoFileSystem: 05e8c679738bd90263f9ed32bfa221f7b52ebbe5
   ExpoFont: cdd7a1d574a376fa003c713eff49e0a4df8672c7

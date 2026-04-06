@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
-import { Audio } from 'expo-av';
+import { setAudioModeAsync, type AudioPlayer } from 'expo-audio';
 import * as Haptics from 'expo-haptics';
 import { BreathCircle, BreathPhase } from '../components/BreathCircle';
 import { useAudio } from '../hooks/useAudio';
@@ -53,8 +53,8 @@ export function BreathScreen({ prefs, onFinish, onVisualStateChange }: Props) {
   const [awaitingFinalExhale, setAwaitingFinalExhale] = useState(false);
   const [sessionComplete, setSessionComplete] = useState(false);
   const { playAsset, playLoop, stopAll } = useAudio();
-  const ambientARef = useRef<Audio.Sound | null>(null);
-  const ambientBRef = useRef<Audio.Sound | null>(null);
+  const ambientARef = useRef<AudioPlayer | null>(null);
+  const ambientBRef = useRef<AudioPlayer | null>(null);
   const crossfadeRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sessionVolRef = useRef(0);
   const rafRef = useRef<number | null>(null);
@@ -63,6 +63,16 @@ export function BreathScreen({ prefs, onFinish, onVisualStateChange }: Props) {
   const finished = useRef(false);
 
   const currentPhase = PHASES[phaseIndex];
+
+  useEffect(() => {
+    setAudioModeAsync({
+      allowsRecording: false,
+      interruptionMode: 'mixWithOthers',
+      playsInSilentMode: true,
+      shouldPlayInBackground: false,
+      shouldRouteThroughEarpiece: false,
+    }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!showPatternPicker && selectedPattern !== DEFAULT_BREATH_PATTERN) {
@@ -89,7 +99,7 @@ export function BreathScreen({ prefs, onFinish, onVisualStateChange }: Props) {
       ambientBRef.current = b;
 
       if (b) {
-        await b.setPositionAsync(loopDuration / 2);
+        await b.seekTo(loopDuration / 2000);
       }
     };
 
@@ -190,31 +200,31 @@ export function BreathScreen({ prefs, onFinish, onVisualStateChange }: Props) {
 
         try {
           if (a) {
-            const statusA = await a.getStatusAsync();
+            const statusA = a.currentStatus;
             if (statusA.isLoaded) {
-              const pos = statusA.positionMillis % loopDuration;
+              const pos = (statusA.currentTime * 1000) % loopDuration;
               const distToEnd = loopDuration - pos;
               if (distToEnd < CROSSFADE_DURATION) {
-                a.setVolumeAsync(vol * (distToEnd / CROSSFADE_DURATION)).catch(() => {});
+                a.volume = vol * (distToEnd / CROSSFADE_DURATION);
               } else if (pos < CROSSFADE_DURATION) {
-                a.setVolumeAsync(vol * (pos / CROSSFADE_DURATION)).catch(() => {});
+                a.volume = vol * (pos / CROSSFADE_DURATION);
               } else {
-                a.setVolumeAsync(vol).catch(() => {});
+                a.volume = vol;
               }
             }
           }
 
           if (b) {
-            const statusB = await b.getStatusAsync();
+            const statusB = b.currentStatus;
             if (statusB.isLoaded) {
-              const pos = statusB.positionMillis % loopDuration;
+              const pos = (statusB.currentTime * 1000) % loopDuration;
               const distToEnd = loopDuration - pos;
               if (distToEnd < CROSSFADE_DURATION) {
-                b.setVolumeAsync(vol * (distToEnd / CROSSFADE_DURATION)).catch(() => {});
+                b.volume = vol * (distToEnd / CROSSFADE_DURATION);
               } else if (pos < CROSSFADE_DURATION) {
-                b.setVolumeAsync(vol * (pos / CROSSFADE_DURATION)).catch(() => {});
+                b.volume = vol * (pos / CROSSFADE_DURATION);
               } else {
-                b.setVolumeAsync(vol).catch(() => {});
+                b.volume = vol;
               }
             }
           }
