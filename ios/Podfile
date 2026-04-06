@@ -59,5 +59,20 @@ target 'thirty' do
       :mac_catalyst_enabled => false,
       :ccache_enabled => ccache_enabled?(podfile_properties),
     )
+
+    # Add legacy ExpoModulesCore headers for expo-av compatibility
+    # The prebuilt XCFramework on EAS strips these legacy headers,
+    # so we provide them locally in ios/ExpoModulesCoreLegacy/
+    legacy_headers = File.join(__dir__, 'ExpoModulesCoreLegacy')
+    installer.pods_project.targets.each do |target|
+      if target.name == 'EXAV'
+        target.build_configurations.each do |config|
+          current = config.build_settings['HEADER_SEARCH_PATHS'] || '$(inherited)'
+          unless current.include?(legacy_headers)
+            config.build_settings['HEADER_SEARCH_PATHS'] = "#{current} \"#{legacy_headers}\""
+          end
+        end
+      end
+    end
   end
 end

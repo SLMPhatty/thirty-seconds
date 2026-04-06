@@ -141,7 +141,7 @@ export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
               activeOpacity={0.7}
             >
               <Text style={[styles.soundLabel, prefs.ambientSound === s && styles.soundLabelActive]}>
-                {!unlocked && (s === 'brown' || s === 'bowl') ? '🔒 ' : ''}{s === 'brown' ? 'brown noise' : s === 'bowl' ? 'sound bowl' : s}
+                {!unlocked && (s === 'brown' || s === 'bowl') ? '🔒 ' : ''}{s === 'brown' ? 'white noise' : s === 'bowl' ? 'sound bowl' : s}
               </Text>
             </TouchableOpacity>
           ))}

@@ -51,6 +51,7 @@ export function BreathScreen({ prefs, onFinish, onVisualStateChange }: Props) {
   const [ready, setReady] = useState(false);
   const [countdown, setCountdown] = useState(3);
   const [awaitingFinalExhale, setAwaitingFinalExhale] = useState(false);
+  const [sessionComplete, setSessionComplete] = useState(false);
   const { playAsset, playLoop, stopAll } = useAudio();
   const ambientARef = useRef<Audio.Sound | null>(null);
   const ambientBRef = useRef<Audio.Sound | null>(null);
@@ -114,6 +115,7 @@ export function BreathScreen({ prefs, onFinish, onVisualStateChange }: Props) {
   const completeSession = useCallback(() => {
     if (finished.current) return;
     finished.current = true;
+    setSessionComplete(true);
     playAsset(chimeSound, 0.5);
 
     if (ambientARef.current || ambientBRef.current) {
@@ -265,7 +267,7 @@ export function BreathScreen({ prefs, onFinish, onVisualStateChange }: Props) {
 
   useEffect(() => {
     return () => {
-      onVisualStateChange?.('ready', READY_DELAY);
+      onVisualStateChange?.('ready', READY_DELAY, 0);
     };
   }, [onVisualStateChange]);
 
@@ -319,7 +321,7 @@ export function BreathScreen({ prefs, onFinish, onVisualStateChange }: Props) {
         phaseIndex={phaseIndex}
         seconds={ready ? seconds : prefs.duration || 30}
         hideTimer={prefs.hideTimer}
-        breathWord={ready ? currentPhase.label : String(countdown)}
+        breathWord={sessionComplete ? '' : ready ? currentPhase.label : String(countdown)}
         isFinalExhale={isFinalExhale}
         phases={PHASES}
         holdAfterInhale={holdAfterInhale}

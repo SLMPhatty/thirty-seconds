@@ -25,10 +25,10 @@ index 7412ee7..56ed44d 100644
 +typedef EXPromiseResolveBlock UMPromiseResolveBlock;
 +typedef EXPromiseRejectBlock UMPromiseRejectBlock;
 diff --git a/node_modules/expo-modules-core/ios/ExpoModulesCore.h b/node_modules/expo-modules-core/ios/ExpoModulesCore.h
-index c90f976..f7c1ed0 100644
+index 76419a1..74a92ca 100644
 --- a/node_modules/expo-modules-core/ios/ExpoModulesCore.h
 +++ b/node_modules/expo-modules-core/ios/ExpoModulesCore.h
-@@ -45,6 +45,9 @@
+@@ -47,6 +47,9 @@
  #import <ExpoModulesCore/EXModuleRegistryHolderReactModule.h>
  #import <ExpoModulesCore/EXModuleRegistryProvider.h>
  #import <ExpoModulesCore/EXNativeModulesProxy.h>

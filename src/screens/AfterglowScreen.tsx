@@ -1,12 +1,5 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  Easing,
-  ReduceMotion,
-} from 'react-native-reanimated';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import { colors, fonts } from '../theme';
 
 interface Props {
@@ -18,13 +11,25 @@ const HOLD = 4000;
 const FADE_OUT = 800;
 
 export function AfterglowScreen({ onComplete }: Props) {
-  const opacity = useSharedValue(0);
+  const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    opacity.value = withTiming(1, { duration: FADE_IN, easing: Easing.out(Easing.ease), reduceMotion: ReduceMotion.Never });
+    // Fade in
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: FADE_IN,
+      easing: Easing.out(Easing.ease),
+      useNativeDriver: true,
+    }).start();
 
+    // Fade out after hold
     const fadeOutTimer = setTimeout(() => {
-      opacity.value = withTiming(0, { duration: FADE_OUT, easing: Easing.in(Easing.ease), reduceMotion: ReduceMotion.Never });
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: FADE_OUT,
+        easing: Easing.in(Easing.ease),
+        useNativeDriver: true,
+      }).start();
     }, FADE_IN + HOLD);
 
     const navTimer = setTimeout(onComplete, FADE_IN + HOLD + FADE_OUT + 50);
@@ -35,15 +40,13 @@ export function AfterglowScreen({ onComplete }: Props) {
     };
   }, []);
 
-  const animStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
-
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.content, animStyle]}>
-        <Animated.Text style={styles.heading}>well done.</Animated.Text>
-        <Animated.Text style={styles.subtext}>
+      <Animated.View style={[styles.content, { opacity }]}>
+        <Text style={styles.heading}>well done.</Text>
+        <Text style={styles.subtext}>
           a brief moment of stillness{'\n'}allows us to re-center.
-        </Animated.Text>
+        </Text>
       </Animated.View>
     </View>
   );

@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
-import Animated, { FadeIn, FadeOut, ReduceMotion } from 'react-native-reanimated';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Animated, Easing } from 'react-native';
 import { colors } from '../theme';
 
 interface Props {
@@ -17,6 +16,19 @@ const slides = [
     subtitle: 'tap to begin your practice',
   },
 ];
+
+function FadeInView({ children }: { children: React.ReactNode }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 600,
+      easing: Easing.out(Easing.ease),
+      useNativeDriver: true,
+    }).start();
+  }, []);
+  return <Animated.View style={[styles.content, { opacity }]}>{children}</Animated.View>;
+}
 
 export function OnboardingScreen({ onComplete }: Props) {
   const [index, setIndex] = useState(0);
@@ -37,16 +49,12 @@ export function OnboardingScreen({ onComplete }: Props) {
       onPress={handleTap}
       activeOpacity={1}
     >
-      <Animated.View
-        key={index}
-        entering={FadeIn.duration(600).reduceMotion(ReduceMotion.Never)}
-        style={styles.content}
-      >
+      <FadeInView key={index}>
         <Text style={styles.title}>{slide.title}</Text>
         {slide.subtitle ? (
           <Text style={styles.subtitle}>{slide.subtitle}</Text>
         ) : null}
-      </Animated.View>
+      </FadeInView>
 
       <View style={styles.dots}>
         {slides.map((_, i) => (

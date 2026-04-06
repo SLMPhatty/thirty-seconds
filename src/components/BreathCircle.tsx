@@ -62,13 +62,15 @@ export function BreathCircle({
   const startedRef = useRef(false);
 
   // ── Main breathing animation ──
+  // Only restart when switching between ready/active or when the pattern changes.
+  // The looped animation runs continuously — do NOT stop it on every phase change.
   useEffect(() => {
     const phasesKey = phases.map(p => `${p.phase}:${p.duration}`).join(',');
     const ease = Easing.inOut(Easing.ease);
 
-    mainAnimRef.current?.stop();
-
     if (phase === 'ready') {
+      // Entering idle — stop any running animation and start idle pulse
+      mainAnimRef.current?.stop();
       startedRef.current = false;
       lastPhasesKeyRef.current = '';
       breathAnim.setValue(0);
@@ -83,6 +85,8 @@ export function BreathCircle({
       anim.start();
 
     } else if (!startedRef.current || lastPhasesKeyRef.current !== phasesKey) {
+      // First active phase or pattern changed — start the breath loop
+      mainAnimRef.current?.stop();
       startedRef.current = true;
       lastPhasesKeyRef.current = phasesKey;
       breathAnim.setValue(0);
@@ -126,6 +130,9 @@ export function BreathCircle({
       mainAnimRef.current = anim;
       anim.start();
     }
+    // Note: when phase changes within an active session (in→out→in…) but the
+    // pattern hasn't changed, we intentionally do nothing — the looped animation
+    // is already running and stays in sync.
   }, [phase, phaseDuration, phases]);
 
   // ── Hold pulse ──

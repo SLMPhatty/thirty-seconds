@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Share } from 'react-native';
-import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Share, Animated, Easing } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { colors } from '../theme';
 import { getQuote } from '../utils/quotes';
@@ -17,6 +16,22 @@ async function celebrationHaptic() {
   await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
   await new Promise((r) => setTimeout(r, 110));
   await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+}
+
+function MilestoneFadeIn({ delay, children }: { delay: number; children: React.ReactNode }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 800,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: true,
+      }).start();
+    }, delay);
+    return () => clearTimeout(timer);
+  }, []);
+  return <Animated.View style={{ opacity }}>{children}</Animated.View>;
 }
 
 export function DoneScreen({ onAgain, onUnlock }: Props) {
@@ -59,12 +74,12 @@ export function DoneScreen({ onAgain, onUnlock }: Props) {
         <Text style={[styles.streakNum, milestone && styles.streakNumMilestone]}>{streak}</Text>
         {milestone ? (
           <>
-            <Animated.Text entering={FadeIn.duration(800).reduceMotion(ReduceMotion.Never)} style={styles.milestoneText}>
-              milestone reached
-            </Animated.Text>
-            <Animated.Text entering={FadeIn.duration(900).reduceMotion(ReduceMotion.Never)} style={styles.milestoneSubtext}>
-              {milestone}
-            </Animated.Text>
+            <MilestoneFadeIn delay={0}>
+              <Text style={styles.milestoneText}>milestone reached</Text>
+            </MilestoneFadeIn>
+            <MilestoneFadeIn delay={100}>
+              <Text style={styles.milestoneSubtext}>{milestone}</Text>
+            </MilestoneFadeIn>
           </>
         ) : (
           <Text style={styles.streakLabel}>day streak</Text>
