@@ -3,7 +3,7 @@ import { logMindfulMinutes } from '../utils/healthkit';
 
 export function useHealthKit() {
   const logSessionToHealthKit = useCallback(async (durationSeconds: number) => {
-    await logMindfulMinutes(durationSeconds);
+    return logMindfulMinutes(durationSeconds);
   }, []);
 
   return { logSessionToHealthKit };

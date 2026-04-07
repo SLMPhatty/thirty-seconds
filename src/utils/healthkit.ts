@@ -5,6 +5,11 @@ const HEALTHKIT_STATUS_KEY = 'thirty-healthkit-status';
 
 type HealthKitStatus = 'unknown' | 'granted' | 'denied' | 'unavailable';
 
+export type HealthKitLogResult =
+  | { attempted: false; saved: false; reason: 'disabled' | 'unavailable' | 'denied' }
+  | { attempted: true; saved: false; reason: 'save_failed' }
+  | { attempted: true; saved: true; reason: 'saved' };
+
 type AppleHealthKitModule = {
   Constants?: {
     Permissions?: {
@@ -76,34 +81,34 @@ export async function requestHealthKitAuth(): Promise<boolean> {
   });
 }
 
-export async function logMindfulMinutes(durationSeconds: number): Promise<void> {
+export async function logMindfulMinutes(durationSeconds: number): Promise<HealthKitLogResult> {
   const module = getHealthKitModule();
   if (!module?.saveMindfulSession) {
     await setStoredStatus('unavailable');
-    return;
+    return { attempted: false, saved: false, reason: 'unavailable' };
   }
 
   let status = await getStoredStatus();
   if (status === 'unavailable' || status === 'denied') {
-    return;
+    return { attempted: false, saved: false, reason: status };
   }
 
   if (status === 'unknown') {
     const granted = await requestHealthKitAuth();
     if (!granted) {
-      return;
+      return { attempted: false, saved: false, reason: 'denied' };
     }
     status = 'granted';
   }
 
   if (status !== 'granted') {
-    return;
+    return { attempted: false, saved: false, reason: 'denied' };
   }
 
   const endDate = new Date();
   const startDate = new Date(endDate.getTime() - durationSeconds * 1000);
 
-  await new Promise<void>((resolve) => {
+  return new Promise<HealthKitLogResult>((resolve) => {
     module.saveMindfulSession?.(
       {
         startDate: startDate.toISOString(),
@@ -112,8 +117,10 @@ export async function logMindfulMinutes(durationSeconds: number): Promise<void> 
       async (error?: unknown) => {
         if (error) {
           console.warn('[HealthKit] Failed to save mindful session', error);
+          resolve({ attempted: true, saved: false, reason: 'save_failed' });
+          return;
         }
-        resolve();
+        resolve({ attempted: true, saved: true, reason: 'saved' });
       }
     );
   });

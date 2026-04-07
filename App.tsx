@@ -46,6 +46,7 @@ export default function App() {
   });
   const [firstSession, setFirstSession] = useState(true);
   const [appReady, setAppReady] = useState(false);
+  const [lastHealthKitSaved, setLastHealthKitSaved] = useState(false);
   const { logSessionToHealthKit } = useHealthKit();
   const { refreshStreakProtection } = useStreakProtection();
   const splashHidden = useRef(false);
@@ -124,9 +125,12 @@ export default function App() {
 
   const handleFinish = async () => {
     await recordSession(prefs.duration);
+    let healthKitSaved = false;
     if (prefs.healthKit) {
-      await logSessionToHealthKit(prefs.duration);
+      const result = await logSessionToHealthKit(prefs.duration);
+      healthKitSaved = result.saved;
     }
+    setLastHealthKitSaved(healthKitSaved);
     const streak = await getStreak();
     await updateWidget(streak);
     if (prefs.reminderTime !== 'off') {
@@ -175,10 +179,18 @@ export default function App() {
         />
       )}
       {screen === 'afterglow' && (
-        <AfterglowScreen onComplete={() => setScreen('done')} />
+        <AfterglowScreen
+          duration={prefs.duration}
+          healthKitEnabled={prefs.healthKit}
+          healthKitSaved={lastHealthKitSaved}
+          onComplete={() => setScreen('done')}
+        />
       )}
       {screen === 'done' && (
         <DoneScreen
+          duration={prefs.duration}
+          healthKitEnabled={prefs.healthKit}
+          healthKitSaved={lastHealthKitSaved}
           onAgain={handleAgain}
           onUnlock={() => setScreen('unlock')}
         />

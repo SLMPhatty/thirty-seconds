@@ -156,11 +156,6 @@ export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
           active={prefs.haptics}
           onPress={() => togglePref('haptics')}
         />
-        <OptionPill
-          label="Apple Health"
-          active={prefs.healthKit}
-          onPress={() => togglePref('healthKit')}
-        />
         <DurationPicker
           selected={prefs.duration}
           unlocked={unlocked}
@@ -168,9 +163,31 @@ export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
         />
       </View>
 
-      {prefs.healthKit && (
-        <Text style={styles.healthNote}>syncing mindful minutes to Apple Health</Text>
-      )}
+      <TouchableOpacity
+        style={[styles.healthCard, prefs.healthKit && styles.healthCardActive]}
+        onPress={() => togglePref('healthKit')}
+        activeOpacity={0.8}
+      >
+        <View style={styles.healthCardHeader}>
+          <View style={[styles.healthIconWrap, prefs.healthKit && styles.healthIconWrapActive]}>
+            <Text style={styles.healthIcon}>♡</Text>
+          </View>
+          <View style={styles.healthCardCopy}>
+            <Text style={styles.healthTitle}>Apple Health Integration</Text>
+            <Text style={styles.healthDescription}>
+              Log each meditation session to Apple Health as Mindful Minutes.
+            </Text>
+          </View>
+        </View>
+        <View style={styles.healthCardFooter}>
+          <Text style={[styles.healthStatus, prefs.healthKit && styles.healthStatusActive]}>
+            {prefs.healthKit ? 'On: saving mindful minutes' : 'Off: not saving to Apple Health'}
+          </Text>
+          <View style={[styles.healthToggle, prefs.healthKit && styles.healthToggleActive]}>
+            <View style={[styles.healthToggleKnob, prefs.healthKit && styles.healthToggleKnobActive]} />
+          </View>
+        </View>
+      </TouchableOpacity>
 
       {streak > 0 && (
         <TouchableOpacity style={styles.streakRow} onPress={onHistory} activeOpacity={0.7}>
@@ -250,6 +267,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 10,
     marginTop: 36,
+    marginBottom: 18,
     maxWidth: 340,
   },
   soundPicker: {
@@ -275,12 +293,98 @@ const styles = StyleSheet.create({
   soundLabelActive: {
     color: colors.text,
   },
-  healthNote: {
-    marginTop: 12,
-    fontSize: 12,
+  healthCard: {
+    width: '100%',
+    maxWidth: 340,
+    borderRadius: 26,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    paddingVertical: 18,
+    paddingHorizontal: 18,
+    gap: 16,
+  },
+  healthCardActive: {
+    borderColor: colors.accentBorder,
+    backgroundColor: 'rgba(240, 200, 150, 0.06)',
+  },
+  healthCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  healthIconWrap: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.borderFaint,
+    backgroundColor: 'rgba(232, 228, 223, 0.03)',
+  },
+  healthIconWrapActive: {
+    borderColor: colors.accentBorder,
+    backgroundColor: 'rgba(240, 200, 150, 0.12)',
+  },
+  healthIcon: {
+    fontSize: 23,
+    color: colors.warm,
+    fontFamily: 'DMSans_500Medium',
+  },
+  healthCardCopy: {
+    flex: 1,
+    gap: 4,
+  },
+  healthTitle: {
+    fontSize: 16,
+    color: colors.text,
+    fontFamily: 'DMSans_500Medium',
+  },
+  healthDescription: {
+    fontSize: 14,
+    color: colors.textDim,
+    fontFamily: 'DMSans',
+    lineHeight: 20,
+  },
+  healthCardFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  healthStatus: {
+    flex: 1,
+    fontSize: 13,
     color: colors.textFaint,
     fontFamily: 'DMSans',
-    opacity: 0.7,
+  },
+  healthStatusActive: {
+    color: colors.text,
+  },
+  healthToggle: {
+    width: 52,
+    height: 30,
+    borderRadius: 15,
+    padding: 3,
+    borderWidth: 1,
+    borderColor: colors.borderFaint,
+    backgroundColor: 'rgba(232, 228, 223, 0.08)',
+    justifyContent: 'center',
+  },
+  healthToggleActive: {
+    borderColor: colors.accentBorder,
+    backgroundColor: 'rgba(165, 148, 249, 0.25)',
+  },
+  healthToggleKnob: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: colors.textFaint,
+  },
+  healthToggleKnobActive: {
+    marginLeft: 22,
+    backgroundColor: colors.text,
   },
   streakRow: {
     flexDirection: 'row',

@@ -20,6 +20,7 @@ Features:
 - Guided breathing animation that expands and contracts with your breath
 - Optional ocean wave sounds that sync to your inhales and exhales
 - Daily streak tracking to build a consistent practice
+- Apple Health integration that logs completed sessions as Mindful Minutes
 - Minimalist dark interface designed for calm
 
 Try 3 free sessions. Unlock unlimited sessions and longer durations with a single $4.99 purchase — no subscriptions, ever.
