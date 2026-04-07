@@ -67,6 +67,19 @@ src/
 - New duration: update DurationPicker component
 - Widget updates: modify src/utils/widget.ts
 
+## ⚠️ BUILD NUMBER — CRITICAL (read this before EVERY build)
+Build numbers exist in THREE places and ALL THREE must match:
+1. `app.json` → `expo.ios.buildNumber`
+2. `ios/thirty/Info.plist` → `CFBundleVersion`
+3. `ios/thirty.xcodeproj/project.pbxproj` → `CURRENT_PROJECT_VERSION` (appears twice: Debug + Release)
+
+**Before every EAS build, run:** `./scripts/sync-build-number.sh`
+
+This syncs from app.json to the native files. If you skip this, EAS uses the NATIVE values
+and Apple will reject the upload as a duplicate build number. This has happened 3+ times already.
+
+**When bumping build number:** Change it in `app.json` THEN run the sync script. Never edit native files manually.
+
 ## Don't
 - Don't add a backend or user accounts
 - Don't change the dark theme
