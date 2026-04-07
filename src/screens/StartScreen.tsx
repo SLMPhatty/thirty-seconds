@@ -156,12 +156,21 @@ export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
           active={prefs.haptics}
           onPress={() => togglePref('haptics')}
         />
+        <OptionPill
+          label="Apple Health"
+          active={prefs.healthKit}
+          onPress={() => togglePref('healthKit')}
+        />
         <DurationPicker
           selected={prefs.duration}
           unlocked={unlocked}
           onSelect={selectDuration}
         />
       </View>
+
+      {prefs.healthKit && (
+        <Text style={styles.healthNote}>syncing mindful minutes to Apple Health</Text>
+      )}
 
       {streak > 0 && (
         <TouchableOpacity style={styles.streakRow} onPress={onHistory} activeOpacity={0.7}>
@@ -265,6 +274,13 @@ const styles = StyleSheet.create({
   },
   soundLabelActive: {
     color: colors.text,
+  },
+  healthNote: {
+    marginTop: 12,
+    fontSize: 12,
+    color: colors.textFaint,
+    fontFamily: 'DMSans',
+    opacity: 0.7,
   },
   streakRow: {
     flexDirection: 'row',

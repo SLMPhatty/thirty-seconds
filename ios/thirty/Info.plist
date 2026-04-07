@@ -47,9 +47,9 @@
 		<true/>
 	</dict>
 	<key>NSHealthShareUsageDescription</key>
-	<string>thirty uses HealthKit to log your mindful minutes.</string>
+	<string>thirty accesses Apple Health to support recording your meditation sessions as Mindful Minutes.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>thirty logs your meditation sessions as mindful minutes in Health.</string>
+	<string>thirty saves each completed meditation session to Apple Health as a Mindful Minute, so your practice appears in your Health app.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Allow $(PRODUCT_NAME) to access your microphone</string>
 	<key>RCTNewArchEnabled</key>

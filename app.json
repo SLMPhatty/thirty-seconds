@@ -23,8 +23,8 @@
       },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSHealthShareUsageDescription": "thirty uses HealthKit to log your mindful minutes.",
-        "NSHealthUpdateUsageDescription": "thirty logs your meditation sessions as mindful minutes in Health."
+        "NSHealthShareUsageDescription": "thirty accesses Apple Health to support recording your meditation sessions as Mindful Minutes.",
+        "NSHealthUpdateUsageDescription": "thirty saves each completed meditation session to Apple Health as a Mindful Minute, so your practice appears in your Health app."
       }
     },
     "android": {
