@@ -17,7 +17,6 @@ import { HistoryScreen } from './src/screens/HistoryScreen';
 import { AfterglowScreen } from './src/screens/AfterglowScreen';
 import { recordSession, getPrefs, setPrefs as savePrefs, getStreak, Prefs } from './src/utils/storage';
 import { DEFAULT_BREATH_PATTERN } from './src/data/breathingPatterns';
-import { useHealthKit } from './src/hooks/useHealthKit';
 import { useStreakProtection } from './src/hooks/useStreakProtection';
 import { updateWidget } from './src/utils/widget';
 import { colors } from './src/theme';
@@ -38,7 +37,6 @@ export default function App() {
     ambientSound: 'rain',
     hideTimer: false,
     haptics: true,
-    healthKit: true,
     duration: 30,
     breathPattern: DEFAULT_BREATH_PATTERN,
     reminderTime: 'off',
@@ -46,8 +44,6 @@ export default function App() {
   });
   const [firstSession, setFirstSession] = useState(true);
   const [appReady, setAppReady] = useState(false);
-  const [lastHealthKitSaved, setLastHealthKitSaved] = useState(false);
-  const { logSessionToHealthKit } = useHealthKit();
   const { refreshStreakProtection } = useStreakProtection();
   const splashHidden = useRef(false);
 
@@ -125,12 +121,6 @@ export default function App() {
 
   const handleFinish = async () => {
     await recordSession(prefs.duration);
-    let healthKitSaved = false;
-    if (prefs.healthKit) {
-      const result = await logSessionToHealthKit(prefs.duration);
-      healthKitSaved = result.saved;
-    }
-    setLastHealthKitSaved(healthKitSaved);
     const streak = await getStreak();
     await updateWidget(streak);
     if (prefs.reminderTime !== 'off') {
@@ -181,16 +171,12 @@ export default function App() {
       {screen === 'afterglow' && (
         <AfterglowScreen
           duration={prefs.duration}
-          healthKitEnabled={prefs.healthKit}
-          healthKitSaved={lastHealthKitSaved}
           onComplete={() => setScreen('done')}
         />
       )}
       {screen === 'done' && (
         <DoneScreen
           duration={prefs.duration}
-          healthKitEnabled={prefs.healthKit}
-          healthKitSaved={lastHealthKitSaved}
           onAgain={handleAgain}
           onUnlock={() => setScreen('unlock')}
         />

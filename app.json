@@ -13,7 +13,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "buildNumber": "31",
+      "buildNumber": "32",
       "bundleIdentifier": "com.thirty.app",
       "appleTeamId": "B2MV35NY53",
       "entitlements": {
@@ -22,9 +22,7 @@
         ]
       },
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false,
-        "NSHealthShareUsageDescription": "thirty accesses Apple Health to support recording your meditation sessions as Mindful Minutes.",
-        "NSHealthUpdateUsageDescription": "thirty saves each completed meditation session to Apple Health as a Mindful Minute, so your practice appears in your Health app."
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {

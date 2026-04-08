@@ -7,8 +7,6 @@ import { getData, isUnlocked as checkUnlocked, getMilestoneMessage, getFreeSessi
 
 interface Props {
   duration: number;
-  healthKitEnabled: boolean;
-  healthKitSaved: boolean;
   onAgain: () => void;
   onUnlock: () => void;
 }
@@ -37,7 +35,7 @@ function MilestoneFadeIn({ delay, children }: { delay: number; children: React.R
   return <Animated.View style={{ opacity }}>{children}</Animated.View>;
 }
 
-export function DoneScreen({ duration, healthKitEnabled, healthKitSaved, onAgain, onUnlock }: Props) {
+export function DoneScreen({ duration, onAgain, onUnlock }: Props) {
   const [quote, setQuote] = useState('');
   const [streak, setStreak] = useState(0);
   const [unlocked, setUnlocked] = useState(false);
@@ -88,18 +86,6 @@ export function DoneScreen({ duration, healthKitEnabled, healthKitSaved, onAgain
           <Text style={styles.streakLabel}>day streak</Text>
         )}
       </View>
-
-      {healthKitEnabled && healthKitSaved && (
-        <View style={styles.healthKitCard}>
-          <Text style={styles.healthKitIcon}>✓</Text>
-          <View style={styles.healthKitCopy}>
-            <Text style={styles.healthKitTitle}>Saved to Apple Health</Text>
-            <Text style={styles.healthKitNote}>
-              {duration} mindful minute{duration === 1 ? '' : 's'} logged
-            </Text>
-          </View>
-        </View>
-      )}
 
       <View style={styles.actions}>
         <TouchableOpacity style={styles.againBtn} onPress={onAgain} activeOpacity={0.7}>
@@ -166,39 +152,6 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans',
     textTransform: 'lowercase',
     letterSpacing: 1,
-  },
-  healthKitCard: {
-    width: '100%',
-    maxWidth: 320,
-    marginBottom: 28,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: colors.accentBorder,
-    backgroundColor: 'rgba(240, 200, 150, 0.08)',
-    paddingVertical: 16,
-    paddingHorizontal: 18,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-  },
-  healthKitIcon: {
-    fontSize: 20,
-    color: colors.warm,
-    fontFamily: 'DMSans_500Medium',
-  },
-  healthKitCopy: {
-    flex: 1,
-  },
-  healthKitTitle: {
-    fontSize: 15,
-    color: colors.text,
-    fontFamily: 'DMSans_500Medium',
-    marginBottom: 2,
-  },
-  healthKitNote: {
-    fontSize: 14,
-    color: colors.textDim,
-    fontFamily: 'DMSans',
   },
   streakNumMilestone: {
     fontSize: 80,

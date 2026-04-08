@@ -32,7 +32,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>31</string>
+	<string>32</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSMinimumSystemVersion</key>
@@ -46,10 +46,6 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
-	<key>NSHealthShareUsageDescription</key>
-	<string>thirty accesses Apple Health to support recording your meditation sessions as Mindful Minutes.</string>
-	<key>NSHealthUpdateUsageDescription</key>
-	<string>thirty saves each completed meditation session to Apple Health as a Mindful Minute, so your practice appears in your Health app.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Allow $(PRODUCT_NAME) to access your microphone</string>
 	<key>RCTNewArchEnabled</key>
