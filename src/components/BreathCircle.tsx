@@ -286,11 +286,22 @@ export function BreathCircle({
 
       {/* Timer */}
       {!hideTimer && (
-        <Text style={styles.timer}>{seconds > 0 ? seconds : ''}</Text>
+        <Animated.Text style={[styles.timer, {
+          color: finalExhaleAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [colors.text, 'rgba(240, 200, 150, 1)'],
+          }) as any,
+        }]}>{seconds > 0 ? seconds : ''}</Animated.Text>
       )}
 
       {/* Breath word */}
-      <Animated.Text style={[styles.word, { opacity: wordOpacityAnim }]}>{breathWord}</Animated.Text>
+      <Animated.Text style={[styles.word, {
+        opacity: wordOpacityAnim,
+        color: finalExhaleAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [colors.text, 'rgba(240, 200, 150, 1)'],
+        }) as any,
+      }]}>{breathWord}</Animated.Text>
     </View>
   );
 }
