@@ -120,7 +120,7 @@ export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
     <View style={styles.container}>
       <Text style={styles.greeting}>{getGreeting()}</Text>
       <Text style={styles.brand}>thirty</Text>
-      <Text style={styles.tagline}>meditation for people who hate meditating</Text>
+      <Text style={styles.tagline}>30 seconds of stillness</Text>
 
       <TouchableOpacity
         style={[styles.startBtn, !playable && styles.startBtnDisabled]}
@@ -155,6 +155,9 @@ export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
           active={prefs.haptics}
           onPress={() => togglePref('haptics')}
         />
+      </View>
+
+      <View style={styles.durationRow}>
         <DurationPicker
           selected={prefs.duration}
           unlocked={unlocked}
@@ -286,6 +289,10 @@ const styles = StyleSheet.create({
     color: colors.warm,
     fontFamily: 'DMSans',
     opacity: 0.8,
+  },
+  durationRow: {
+    width: 200,
+    marginBottom: 18,
   },
   limitNote: {
     marginTop: 16,
