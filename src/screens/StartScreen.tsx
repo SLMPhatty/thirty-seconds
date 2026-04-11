@@ -120,7 +120,7 @@ export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
     <View style={styles.container}>
       <Text style={styles.greeting}>{getGreeting()}</Text>
       <Text style={styles.brand}>thirty</Text>
-      <Text style={styles.tagline}>30 seconds of stillness</Text>
+      <Text style={styles.tagline}>meditation for people who hate meditating</Text>
 
       <TouchableOpacity
         style={[styles.startBtn, !playable && styles.startBtnDisabled]}

@@ -8,12 +8,7 @@ interface Props {
   onSelect: (dur: number) => void;
 }
 
-const durations = [30, 60, 120, 300, 600, 900];
-
-function formatDuration(s: number): string {
-  if (s < 60) return `${s}s`;
-  return `${s / 60}m`;
-}
+const durations = [30, 60];
 
 export function DurationPicker({ selected, unlocked, onSelect }: Props) {
   return (
@@ -34,9 +29,20 @@ export function DurationPicker({ selected, unlocked, onSelect }: Props) {
             onPress={() => onSelect(dur)}
             activeOpacity={0.7}
           >
-            <Text style={[styles.label, isActive && styles.labelActive]}>
-              {formatDuration(dur)}{isLocked ? ' \u{1F512}' : ''}
-            </Text>
+            {dur === 30 ? (
+              <Text style={[styles.label, isActive && styles.labelActive]}>
+                30s
+              </Text>
+            ) : (
+              <View style={styles.labelWrap}>
+                <Text style={[styles.label, isActive && styles.labelActive]}>
+                  1m{isLocked ? ' \u{1F512}' : ''}
+                </Text>
+                <Text style={[styles.sublabel, isActive && styles.sublabelActive]}>
+                  overachiever
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
         );
       })}
@@ -51,11 +57,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.borderFaint,
     overflow: 'hidden',
+    alignSelf: 'stretch',
   },
   btn: {
+    flex: 1,
+    minHeight: 62,
     paddingVertical: 10,
     paddingHorizontal: 14,
     backgroundColor: 'rgba(232, 228, 223, 0.02)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   btnBorder: {
     borderRightWidth: 1,
@@ -68,8 +79,23 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.textFaint,
     fontFamily: 'DMSans',
+    textAlign: 'center',
   },
   labelActive: {
     color: colors.text,
+  },
+  labelWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sublabel: {
+    marginTop: 2,
+    fontSize: 10,
+    color: colors.textDim,
+    fontFamily: 'DMSans',
+    textAlign: 'center',
+  },
+  sublabelActive: {
+    color: colors.textFaint,
   },
 });

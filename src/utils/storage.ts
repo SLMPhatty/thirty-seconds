@@ -143,13 +143,13 @@ export const MILESTONES = [7, 14, 30, 60, 90, 180, 365];
 
 export function getMilestoneMessage(streak: number): string | null {
   const messages: Record<number, string> = {
-    7: 'one week of showing up',
+    7: 'one week. look at you, forming habits',
     14: 'two weeks. the ritual is taking hold',
-    30: 'a whole month of stillness',
+    30: 'a whole month. namaste or whatever',
     60: 'sixty days — this is who you are now',
     90: 'ninety days of returning to yourself',
-    180: 'six months of steady presence',
-    365: 'one year. you changed your life.',
+    180: 'six months. we are not crying, you are crying',
+    365: 'one year. you actually changed your life',
   };
   return messages[streak] || null;
 }
