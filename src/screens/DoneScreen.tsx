@@ -68,7 +68,7 @@ export function DoneScreen({ duration, onAgain, onUnlock }: Props) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.doneWord}>still.</Text>
+      <Text style={styles.doneWord}>still, you are.</Text>
       <Text style={styles.quote}>{quote}</Text>
 
       <View style={styles.streakWrap}>

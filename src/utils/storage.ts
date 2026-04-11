@@ -139,10 +139,12 @@ export async function isPremiumFeature(feature: 'haptics' | 'duration'): Promise
   return await isUnlocked();
 }
 
-export const MILESTONES = [7, 14, 30, 60, 90, 180, 365];
+export const MILESTONES = [1, 3, 7, 14, 30, 60, 90, 180, 365];
 
 export function getMilestoneMessage(streak: number): string | null {
   const messages: Record<number, string> = {
+    1: 'begun, your journey has',
+    3: 'three days. everyone starts somewhere',
     7: 'one week. look at you, forming habits',
     14: 'two weeks. the ritual is taking hold',
     30: 'one month down. this is becoming a thing.',
