@@ -81,9 +81,8 @@ export default function App() {
     (async () => {
       const p = await getPrefs();
       setLocalPrefs(p);
-      if (!p.onboardingSeen) {
-        setScreen('onboarding');
-      }
+      // Always show onboarding intro on app open
+      setScreen('onboarding');
       if (p.reminderTime !== 'off') {
         setFirstSession(false);
         // Re-schedule notification with current streak on each app launch

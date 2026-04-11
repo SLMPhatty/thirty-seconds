@@ -8,7 +8,7 @@ interface Props {
 
 const slides = [
   {
-    title: "the world's\nshortest meditation",
+    title: 'the shortest meditation\nin the galaxy, this is',
     subtitle: '',
   },
   {
