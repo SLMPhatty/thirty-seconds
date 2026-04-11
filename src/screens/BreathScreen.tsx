@@ -126,7 +126,28 @@ export function BreathScreen({ prefs, onFinish, onVisualStateChange }: Props) {
     if (finished.current) return;
     finished.current = true;
     setSessionComplete(true);
-    playAsset(chimeSound, 0.5);
+    // Play chime softly and fade it out for a gentler ending
+    (async () => {
+      try {
+        const { createAudioPlayer } = require('expo-audio');
+        const chime = createAudioPlayer(chimeSound, { keepAudioSessionActive: true });
+        chime.volume = 0.3;
+        chime.play();
+        // Fade volume down over 2 seconds
+        const fadeSteps = 20;
+        const fadeInterval = 2000 / fadeSteps;
+        let step = 0;
+        const fader = setInterval(() => {
+          step++;
+          chime.volume = 0.3 * (1 - step / fadeSteps);
+          if (step >= fadeSteps) {
+            clearInterval(fader);
+            chime.pause();
+            chime.remove();
+          }
+        }, fadeInterval);
+      } catch {}
+    })();
 
     if (ambientARef.current || ambientBRef.current) {
       const startTime = performance.now();
