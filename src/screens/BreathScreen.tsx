@@ -151,11 +151,22 @@ export function BreathScreen({ prefs, onFinish, onVisualStateChange }: Props) {
       return;
     }
 
+    // If we're awaiting final exhale and currently inhaling or holding,
+    // skip ahead to the next exhale phase instead of continuing the cycle
+    if (awaitingFinalExhale) {
+      const nextOutIdx = PHASES.findIndex((p, i) => i > phaseIndex && p.phase === 'out');
+      const wrapOutIdx = nextOutIdx >= 0 ? nextOutIdx : PHASES.findIndex(p => p.phase === 'out');
+      if (wrapOutIdx >= 0) {
+        setPhaseIndex(wrapOutIdx);
+        return;
+      }
+    }
+
     setPhaseIndex((prev) => {
       const next = (prev + 1) % PHASES.length;
       return next;
     });
-  }, [PHASES.length, awaitingFinalExhale, completeSession, currentPhase.phase]);
+  }, [PHASES, phaseIndex, awaitingFinalExhale, completeSession, currentPhase.phase]);
 
   useEffect(() => {
     if (!ready || !prefs.haptics || currentPhase.phase !== 'in') return;

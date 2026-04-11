@@ -160,14 +160,38 @@ export function BreathCircle({
     Animated.timing(wordOpacityAnim, { toValue: 1, duration: 400, easing: Easing.out(Easing.ease), useNativeDriver: false }).start();
   }, [breathWord]);
 
-  // ── Final exhale golden glow ──
+  // ── Final exhale — stop the loop, gracefully animate to zero, hold still ──
   useEffect(() => {
-    Animated.timing(finalExhaleAnim, {
-      toValue: isFinalExhale ? 1 : 0,
-      duration: Math.min(phaseDuration, 1200),
-      easing: Easing.inOut(Easing.ease),
-      useNativeDriver: false,
-    }).start();
+    if (isFinalExhale) {
+      // Stop the looped breathing animation
+      mainAnimRef.current?.stop();
+      holdAnimRef.current?.stop();
+      holdPulseAnim.setValue(0);
+
+      // Smoothly animate breath to fully exhaled (0) and golden glow in
+      const exhaleDuration = Math.min(phaseDuration, 3000);
+      Animated.parallel([
+        Animated.timing(breathAnim, {
+          toValue: 0,
+          duration: exhaleDuration,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: false,
+        }),
+        Animated.timing(finalExhaleAnim, {
+          toValue: 1,
+          duration: Math.min(exhaleDuration, 1200),
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: false,
+        }),
+      ]).start();
+    } else {
+      Animated.timing(finalExhaleAnim, {
+        toValue: 0,
+        duration: 400,
+        easing: Easing.inOut(Easing.ease),
+        useNativeDriver: false,
+      }).start();
+    }
   }, [isFinalExhale, phaseDuration]);
 
   // Cleanup on unmount
