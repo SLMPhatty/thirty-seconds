@@ -238,8 +238,18 @@ export function BreathCircle({
     ],
   });
 
-  // Golden ring overlay opacity — fades in on final exhale
+  // Final exhale: fade purple ring out, golden ring in
+  const purpleRingOpacity = Animated.multiply(
+    ringOpacity,
+    finalExhaleAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 0] })
+  );
   const goldenOpacity = Animated.multiply(ringOpacity, finalExhaleAnim);
+
+  // Core transitions to warm/golden during final exhale
+  const coreBackgroundFinal = finalExhaleAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['rgba(165, 148, 249, 0.12)', 'rgba(240, 200, 150, 0.20)'],
+  });
 
   // Golden ring scale — same as ring
   const ringBaseScale2 = breathAnim.interpolate({ inputRange: [0, 1], outputRange: [0.88, 1.06] });
@@ -250,10 +260,10 @@ export function BreathCircle({
       {/* Warm radial halo behind ring */}
       <Animated.View style={[styles.halo, { opacity: haloOpacity, transform: [{ scale: haloScale as any }] }]} />
 
-      {/* Main ring — thin border + purple glow */}
+      {/* Main ring — thin border + purple glow (fades out on final exhale) */}
       <Animated.View style={[styles.ring, {
         transform: [{ scale: ringScale as any }],
-        opacity: ringOpacity,
+        opacity: purpleRingOpacity as any,
         borderColor: ringBorderColor,
       }]} />
 
@@ -265,10 +275,10 @@ export function BreathCircle({
         shadowColor: 'rgba(240, 200, 150, 1)',
       }]} />
 
-      {/* Core — frosted glass sphere */}
+      {/* Core — frosted glass sphere (transitions to warm on final exhale) */}
       <Animated.View style={[styles.core, {
         transform: [{ scale: coreScale as any }],
-        backgroundColor: coreBackground,
+        backgroundColor: coreBackgroundFinal as any,
       }]} />
 
       {/* Center white glow */}
