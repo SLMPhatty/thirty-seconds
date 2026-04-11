@@ -2,7 +2,7 @@ APP STORE CONNECT — METADATA
 ==============================
 
 App Name: thirty
-Subtitle: 30-Second Meditation Timer
+Subtitle: Hate meditating, you do?
 Category: Health & Fitness
 Subcategory: Mindfulness
 

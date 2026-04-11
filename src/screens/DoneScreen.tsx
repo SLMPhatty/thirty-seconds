@@ -62,7 +62,7 @@ export function DoneScreen({ duration, onAgain, onUnlock }: Props) {
   const handleShare = async () => {
     const msg = milestone
       ? `${streak} days of stillness. ${milestone} #thirty`
-      : `I just took 30 seconds for myself. #thirty`;
+      : `meditated for 30 seconds, I just did. basically a monk, I am. #thirty`;
     await Share.share({ message: msg });
   };
 
