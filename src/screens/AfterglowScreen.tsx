@@ -44,7 +44,7 @@ export function AfterglowScreen({ duration, onComplete }: Props) {
   return (
     <View style={styles.container}>
       <Animated.View style={[styles.content, { opacity }]}>
-        <Text style={styles.heading}>done, you are.</Text>
+        <Text style={styles.heading}>powerful, you are.</Text>
         <Text style={styles.subtext}>go be great.</Text>
       </Animated.View>
     </View>
