@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     fontFamily: 'InstrumentSerif',
     fontSize: 64,
     color: colors.warm,
-    lineHeight: 64,
+    lineHeight: 78,
   },
   streakLabel: {
     fontSize: 13,
@@ -155,6 +155,7 @@ const styles = StyleSheet.create({
   },
   streakNumMilestone: {
     fontSize: 80,
+    lineHeight: 96,
     color: colors.accent,
   },
   milestoneText: {
