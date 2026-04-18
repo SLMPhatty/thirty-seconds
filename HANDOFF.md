@@ -67,8 +67,7 @@ thirty/
 │   │   ├── rain-loop.wav
 │   │   ├── brown-loop.wav
 │   │   ├── bowl-loop.wav
-│   │   ├── chime.wav
-│   │   └── waves-loop.wav
+│   │   └── chime.wav
 │   ├── icon.png
 │   ├── splash-icon.png
 │   ├── favicon.png
@@ -208,7 +207,7 @@ This has caused 3+ rejected uploads. EAS uses the native values, not app.json, w
 This app went through **multiple rejections**. Key lessons:
 
 1. **Guideline 2.5.4** — Don't declare `UIBackgroundModes: audio` unless you actually play audio in the background
-2. **Guideline 2.5.1** — HealthKit was declared but not visible enough in UI. After 3 rejections for this, **HealthKit was completely removed** (build 32). Plan to add back in v1.1+ after approval.
+2. **Guideline 2.5.1** — HealthKit was declared but not visible enough in UI. After 3 rejections for this, **HealthKit was completely removed** (build 32). Re-adding HealthKit would require a UI-prominent integration plan that clears Guideline 2.5.1 (the feature must be visibly used, not just declared). Not on the roadmap and should not be attempted without re-reading the three prior rejection reasons.
 3. **Guideline 2.1(b)** — IAP must work in sandbox. v6 API calls on v14 library = silent failure
 4. **Build number mismatches** — 3+ failed uploads. Always run sync script.
 

@@ -7,10 +7,9 @@ A premium 30-second meditation app built with React Native / Expo. Dark, minimal
 - **Framework:** React Native + Expo SDK 55
 - **Language:** TypeScript
 - **State:** AsyncStorage (local, no backend)
-- **Payments:** RevenueCat (in-app purchase, $4.99 lifetime unlock)
-- **Health:** HealthKit integration (mindful minutes)
+- **Payments:** react-native-iap v14 (raw StoreKit, $4.99 lifetime unlock)
 - **Notifications:** expo-notifications (streak protection)
-- **Audio:** expo-av (ambient crossfade audio)
+- **Audio:** expo-audio (ambient crossfade audio)
 - **Haptics:** expo-haptics (milestone celebrations, breath feedback)
 
 ## Architecture
@@ -28,18 +27,16 @@ src/
     ReminderScreen   — Notification scheduling
   components/
     BreathCircle     — Animated breathing circle (inhale/hold/exhale phases)
-    DurationPicker   — Time selection (30s, 1m, 3m, 5m, 10m, 15m)
+    DurationPicker   — Time selection (30s free, 1m premium)
     OptionPill       — Reusable pill-style selector
     BackgroundOrbs   — Ambient floating orb animations
   hooks/
     useAudio         — Ambient audio management
-    usePurchase      — RevenueCat purchase flow
+    usePurchase      — react-native-iap purchase flow
     useStreakProtection — Notification scheduling for streak reminders
-    useHealthKit     — HealthKit mindful minutes logging
   utils/
     quotes.ts        — Milestone messages ("sixty days — this is who you are now")
     storage.ts       — AsyncStorage helpers
-    healthkit.ts     — HealthKit bridge
     widget.ts        — iOS widget data bridge
   data/
     breathingPatterns.ts — Box breathing, 4-7-8, coherence patterns
@@ -49,8 +46,8 @@ src/
 ## Key Design Decisions
 - Dark theme only (#0a0a12 background)
 - Instrument Serif font for luxury feel
-- 30-second default, longer durations are premium
-- Breathing patterns (box, 4-7-8, coherence) for 1min+ only
+- Two durations: 30s (free) and 1m (premium)
+- Breathing patterns (box, 4-7-8, coherence) available on the 1m premium session
 - Haptic feedback on milestones and breath phase transitions
 - Crossfade ambient audio during sessions
 - No accounts, no backend — purely local
@@ -59,12 +56,13 @@ src/
 - Bundle ID: com.thirty.app
 - Team ID: B2MV35NY53
 - App Groups: group.com.thirty.app (for widget data sharing)
+- HealthKit has been **removed entirely** (rejected under Guideline 2.5.1 three times). Do not re-add without a UI-prominent integration plan.
 - Currently in App Store review/approval
 
 ## Common Tasks
 - Price changes: update in StartScreen, DoneScreen, and UnlockScreen
 - New breathing pattern: add to src/data/breathingPatterns.ts
-- New duration: update DurationPicker component
+- New duration: update DurationPicker component (note: only 30s/1m are currently supported — adding more requires re-evaluating the free/premium split)
 - Widget updates: modify src/utils/widget.ts
 
 ## ⚠️ BUILD NUMBER — CRITICAL (read this before EVERY build)
@@ -85,3 +83,5 @@ and Apple will reject the upload as a duplicate build number. This has happened 
 - Don't change the dark theme
 - Don't modify the font choice
 - Don't break the 30-second free tier
+- Don't re-add HealthKit without a prominent-UI integration plan (prior rejections under Guideline 2.5.1)
+- Don't declare `UIBackgroundModes: audio` in Info.plist (rejected under Guideline 2.5.4 — app doesn't play audio in background)

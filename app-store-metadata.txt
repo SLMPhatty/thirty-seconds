@@ -18,12 +18,13 @@ Open the app. Tap begin. Follow the breathing circle. That's it.
 
 Features:
 - Guided breathing animation that expands and contracts with your breath
-- Optional ocean wave sounds that sync to your inhales and exhales
+- Ambient sounds: rain, white noise, and singing bowl
+- Breathing patterns (box, 4-7-8, coherence) for longer sessions
 - Daily streak tracking to build a consistent practice
-- Apple Health integration that logs completed sessions as Mindful Minutes
-- Minimalist dark interface designed for calm
+- Haptic feedback on each inhale
+- Dark minimalist interface designed for calm
 
-Try 3 free sessions. Unlock unlimited sessions and longer durations with a single $4.99 purchase — no subscriptions, ever.
+Try 3 free sessions. Unlock longer durations and premium sounds with a single $4.99 purchase — no subscriptions, ever.
 
 Sometimes thirty seconds is all you need.
 
