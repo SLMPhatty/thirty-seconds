@@ -78,6 +78,32 @@ and Apple will reject the upload as a duplicate build number. This has happened 
 
 **When bumping build number:** Change it in `app.json` THEN run the sync script. Never edit native files manually.
 
+## Infrastructure & Decision Log
+
+### Repository layout (verified April 18, 2026)
+
+- This repo (app): github.com/SLMPhatty/thirty-seconds → local at ~/Projects/thirty/
+- Website lives in a separate repo: github.com/SLMPhatty/thirty-website → local at ~/Projects/thirty-website/
+- The two are fully independent — no shared history, no shared build, no shared deployment
+- Website auto-deploys to thirty-website.vercel.app via Vercel's GitHub integration. Pushing to origin main on the website repo triggers a rebuild.
+- Older versions of HANDOFF.md claimed the two shared a repo. That was never true. Do not try to push website code into this repo.
+
+### Deprecated tooling
+
+- OpenClaw sandbox (~/.openclaw/workspace/thirty/) was used to originally scaffold this project. Do not use it going forward — it runs against its own hidden workspace, not the canonical ~/Projects/thirty/ checkout. Any docs referencing ~/.openclaw paths are outdated.
+- Manual `vercel deploy` from the website folder is deprecated. All deployments now come from git push → Vercel webhook.
+
+### Past rejections (for future context)
+
+- Guideline 2.5.4 (UIBackgroundModes: audio) — rejected because the app doesn't actually play audio in the background. Removed declaration.
+- Guideline 2.5.1 (HealthKit) — rejected THREE TIMES because HealthKit was declared but not visibly used in UI. HealthKit has been fully removed. Do not re-add without a UI-prominent integration plan that clears 2.5.1.
+- Guideline 2.1(b) (IAP sandbox failure) — rejected because v6 react-native-iap API calls were running against the v14 library. Fixed by migrating to v14 API (fetchProducts, requestPurchase with platform-specific request object, purchaseUpdatedListener pattern).
+- Duplicate build number uploads — rejected 3+ times because build numbers in app.json, Info.plist, and project.pbxproj fell out of sync. Always run scripts/sync-build-number.sh before any EAS build.
+
+### Key commits
+
+- 1995552 (April 18, 2026) — removed stale HealthKit and ocean-wave references from CLAUDE.md, HANDOFF.md, app-store-metadata.txt, support.html; deleted unused waves-loop.wav asset
+
 ## Don't
 - Don't add a backend or user accounts
 - Don't change the dark theme
