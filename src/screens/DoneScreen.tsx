@@ -68,8 +68,8 @@ export function DoneScreen({ duration, onAgain, onUnlock }: Props) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.doneWord}>stillness.</Text>
-      <Text style={styles.quote}>{quote}</Text>
+      <Text style={styles.doneWord}>you are powerful.</Text>
+      <Text style={styles.quote}>go be great.</Text>
 
       <View style={styles.streakWrap}>
         <Text style={[styles.streakNum, milestone && styles.streakNumMilestone]}>{streak}</Text>

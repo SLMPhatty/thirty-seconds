@@ -12,7 +12,7 @@ const slides = [
     subtitle: '',
   },
   {
-    title: 'one breath.\nthirty seconds.\nthat\'s all.',
+    title: 'breathe.\nthirty seconds.\nthat\'s all.',
     subtitle: 'tap to begin your practice',
   },
 ];

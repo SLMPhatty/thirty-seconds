@@ -11,6 +11,18 @@ const PRODUCT_ID = 'thirty.lifetime.unlock';
 export function usePurchase() {
   const [purchasing, setPurchasing] = useState(false);
   const listenersRef = useRef<{ remove: () => void }[]>([]);
+  const pendingPurchaseRef = useRef<{
+    resolve: (value: boolean) => void;
+    settled: boolean;
+  } | null>(null);
+
+  const settlePendingPurchase = useCallback((value: boolean) => {
+    const pending = pendingPurchaseRef.current;
+    if (!pending || pending.settled) return;
+    pending.settled = true;
+    pendingPurchaseRef.current = null;
+    pending.resolve(value);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -29,9 +41,11 @@ export function usePurchase() {
                 // Finish the transaction — required by Apple/Google before unlocking
                 await RNIap.finishTransaction({ purchase, isConsumable: false });
                 await unlockStorage();
+                settlePendingPurchase(true);
                 if (mounted) setPurchasing(false);
               } catch (e) {
                 console.warn('Failed to finish transaction:', e);
+                settlePendingPurchase(false);
                 if (mounted) {
                   setPurchasing(false);
                   Alert.alert('Error', 'Purchase succeeded but failed to activate. Please tap "restore purchase".');
@@ -47,6 +61,7 @@ export function usePurchase() {
           if (error.code !== 'E_USER_CANCELLED') {
             Alert.alert('Error', 'Something went wrong. Please try again.');
           }
+          settlePendingPurchase(false);
           setPurchasing(false);
         });
 
@@ -58,6 +73,7 @@ export function usePurchase() {
 
     return () => {
       mounted = false;
+      settlePendingPurchase(false);
       for (const listener of listenersRef.current) {
         listener.remove();
       }
@@ -69,7 +85,7 @@ export function usePurchase() {
         // ignore
       }
     };
-  }, []);
+  }, [settlePendingPurchase]);
 
   const purchase = useCallback(async (): Promise<boolean> => {
     setPurchasing(true);
@@ -85,6 +101,10 @@ export function usePurchase() {
         return false;
       }
 
+      const result = new Promise<boolean>((resolve) => {
+        pendingPurchaseRef.current = { resolve, settled: false };
+      });
+
       // v14 API: platform-specific request format
       await RNIap.requestPurchase({
         request: {
@@ -93,16 +113,17 @@ export function usePurchase() {
         },
         type: 'in-app',
       });
-      // Transaction completion handled by purchaseUpdatedListener above
-      return true;
+      // Transaction completion is confirmed by purchaseUpdatedListener above.
+      return await result;
     } catch (e: any) {
       if (e.code !== 'E_USER_CANCELLED') {
         Alert.alert('Error', 'Something went wrong. Please try again.');
       }
+      settlePendingPurchase(false);
       setPurchasing(false);
       return false;
     }
-  }, []);
+  }, [settlePendingPurchase]);
 
   const restore = useCallback(async (): Promise<boolean> => {
     setPurchasing(true);

@@ -1,6 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import { colors, fonts } from '../theme';
+import { getQuote } from '../utils/quotes';
+import { getData } from '../utils/storage';
 
 interface Props {
   duration: number;
@@ -13,6 +15,14 @@ const FADE_OUT = 800;
 
 export function AfterglowScreen({ duration, onComplete }: Props) {
   const opacity = useRef(new Animated.Value(0)).current;
+  const [quote, setQuote] = useState('');
+
+  useEffect(() => {
+    (async () => {
+      const d = await getData();
+      setQuote(getQuote(d.totalSessions));
+    })();
+  }, []);
 
   useEffect(() => {
     // Fade in
@@ -44,8 +54,8 @@ export function AfterglowScreen({ duration, onComplete }: Props) {
   return (
     <View style={styles.container}>
       <Animated.View style={[styles.content, { opacity }]}>
-        <Text style={styles.heading}>you are powerful.</Text>
-        <Text style={styles.subtext}>go be great.</Text>
+        <Text style={styles.heading}>stillness.</Text>
+        <Text style={styles.subtext}>{quote}</Text>
       </Animated.View>
     </View>
   );

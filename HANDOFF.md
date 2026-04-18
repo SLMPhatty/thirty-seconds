@@ -1,0 +1,267 @@
+# 🧘 THIRTY (30 Stillness) — Complete Handoff Package
+
+## What This Is
+**thirty** is a premium 30-second meditation app for iOS. Users breathe for 30 seconds, build streaks, and unlock premium features with a one-time $4.99 purchase. Dark, minimal, luxurious aesthetic.
+
+App Store name: **"30 Stillness"**
+Internal/code name: **"thirty"**
+
+---
+
+## Quick Facts
+| Key | Value |
+|-----|-------|
+| **Bundle ID** | `com.thirty.app` |
+| **Apple Team ID** | `B2MV35NY53` |
+| **Apple ID (ASC)** | `sethlouis@gmail.com` |
+| **ASC App ID** | `6760586218` |
+| **EAS Project ID** | `86800fd2-09c9-4b9d-87d0-66ba35c240a1` |
+| **EAS Owner** | `sethlouis` |
+| **GitHub Repo** | `https://github.com/SLMPhatty/thirty-seconds.git` |
+| **Current Version** | `1.2` |
+| **Current Build Number** | `36` |
+| **IAP Product ID** | `thirty.lifetime.unlock` ($4.99 lifetime) |
+| **Platform** | iOS only (iPhone, `supportsTablet: false`) |
+| **Free tier** | 3 sessions, then paywall |
+| **App Groups** | `group.com.thirty.app` (for future widget) |
+
+---
+
+## Tech Stack
+- **Framework:** React Native + Expo SDK 55
+- **Language:** TypeScript
+- **React:** 19.2.0, React Native 0.83.4
+- **Animations:** react-native-reanimated 4.2.1 (BackgroundOrbs only), RN built-in `Animated` for everything else
+- **State:** AsyncStorage (100% local, no backend, no accounts)
+- **Payments:** react-native-iap v14.7.16 (NOT RevenueCat — raw StoreKit)
+- **Audio:** expo-audio (ambient sounds: rain, brown noise, singing bowl, + chime)
+- **Haptics:** expo-haptics
+- **Notifications:** expo-notifications (streak protection + daily reminders)
+- **Fonts:** Instrument Serif (display), DM Sans (body)
+- **Build system:** EAS Build + Submit
+
+---
+
+## Project Structure
+```
+thirty/
+├── App.tsx                          # Root navigator, screen routing, IAP restore on launch
+├── index.ts                         # Expo entry point
+├── app.json                         # Expo config (version, build number, bundle ID, plugins)
+├── eas.json                         # EAS build profiles (dev/preview/production) + submit config
+├── package.json                     # Dependencies
+├── babel.config.js                  # babel-preset-expo + reanimated plugin
+├── tsconfig.json                    # Extends expo/tsconfig.base, strict mode
+├── privacy-policy.html              # Hosted privacy policy
+├── support.html                     # Hosted support page
+├── app-store-metadata.txt           # App Store description, keywords, subtitle
+├── scripts/
+│   ├── sync-build-number.sh         # ⚠️ MUST run before every EAS build
+│   └── eas-build-pre-install.sh     # EAS hook: copies legacy ExpoModulesCore headers
+├── assets/
+│   ├── fonts/
+│   │   ├── InstrumentSerif-Regular.ttf
+│   │   ├── DMSans-Regular.ttf
+│   │   └── DMSans-Medium.ttf
+│   ├── audio/
+│   │   ├── rain-loop.wav
+│   │   ├── brown-loop.wav
+│   │   ├── bowl-loop.wav
+│   │   ├── chime.wav
+│   │   └── waves-loop.wav
+│   ├── icon.png
+│   ├── splash-icon.png
+│   ├── favicon.png
+│   └── android-icon-*.png
+├── src/
+│   ├── theme.ts                     # Colors + font names
+│   ├── screens/
+│   │   ├── OnboardingScreen.tsx     # 2-slide intro (shows every app open)
+│   │   ├── StartScreen.tsx          # Main screen: greeting, brand, begin button, sound/duration/options
+│   │   ├── BreathScreen.tsx         # Active breathing session with BreathCircle + audio + haptics
+│   │   ├── AfterglowScreen.tsx      # Post-session: "stillness." + quote, auto-advances
+│   │   ├── DoneScreen.tsx           # Completion: streak, milestone, share, "once more"
+│   │   ├── HistoryScreen.tsx        # Practice stats: total, this week, best streak, weekly dots
+│   │   ├── UnlockScreen.tsx         # IAP paywall: $4.99 lifetime unlock
+│   │   └── ReminderScreen.tsx       # Daily reminder scheduling (morning/afternoon/evening)
+│   ├── components/
+│   │   ├── BreathCircle.tsx         # Animated breathing ring/core/halo (RN Animated API)
+│   │   ├── BackgroundOrbs.tsx       # Ambient floating orbs (react-native-reanimated)
+│   │   ├── DurationPicker.tsx       # 30s / 1m picker
+│   │   └── OptionPill.tsx           # Toggle pill component
+│   ├── hooks/
+│   │   ├── useAudio.ts             # Audio player management (playAsset, playLoop, stopAll)
+│   │   ├── usePurchase.ts          # IAP: purchase + restore (react-native-iap v14 API)
+│   │   └── useStreakProtection.ts  # Streak-at-risk notification (6 PM daily)
+│   ├── utils/
+│   │   ├── storage.ts              # AsyncStorage: streaks, sessions, prefs, unlock state, milestones
+│   │   ├── quotes.ts              # Post-session quotes (Yoda-style)
+│   │   └── widget.ts              # iOS widget data bridge (SharedUserDefaults)
+│   └── data/
+│       └── breathingPatterns.ts    # Default, box, 4-7-8, coherence patterns
+└── ios/                            # Native iOS project (generated by Expo, committed)
+```
+
+---
+
+## Screen Flow
+```
+App Launch
+  → OnboardingScreen (2 slides, shows every open)
+  → StartScreen (main hub)
+     ├── [begin] → BreathScreen → AfterglowScreen → DoneScreen → StartScreen
+     ├── [unlock] → UnlockScreen → StartScreen
+     └── [streak tap] → HistoryScreen → StartScreen
+```
+
+---
+
+## Key Design Decisions
+
+### Aesthetic
+- **Dark theme only** — background `#0a0a12`, NO light mode
+- **Instrument Serif** for all display text (brand, titles, breath words)
+- **DM Sans** for body text, labels, stats
+- **Purple accent** `#a594f9` for interactive elements, active states
+- **Warm gold** `#f0c896` for streaks, milestones, pricing CTAs
+- Subtle animated background orbs that breathe with the app
+
+### Breathing Sessions
+- Default: 4s in / 4s out (simple)
+- Premium patterns (≥1 min): box breathing (4-4-4-4), 4-7-8, coherence (5.5-5.5)
+- Session ends gracefully: waits for final exhale, plays fading chime, golden transition
+- Ambient audio: rain, white noise (internally "brown"), singing bowl — crossfade looping
+- Haptic pulse on each inhale start
+
+### Monetization
+- **3 free sessions**, then paywall
+- **$4.99 lifetime unlock** — no subscriptions, ever
+- Premium features: durations >30s, breathing patterns, hide timer, haptics toggle, white noise, singing bowl
+- Dev mode: `DEV_UNLOCKED = __DEV__` auto-unlocks in development
+
+### Streak System
+- Tracks consecutive days of practice
+- Milestones at: 1, 3, 7, 14, 30, 60, 90, 180, 365 days
+- Milestone messages are Yoda-style ("begun, your journey has")
+- Streak-at-risk notification at 6 PM if user hasn't practiced today
+- Share button on DoneScreen
+
+### Quotes
+- End-of-session quotes are Yoda-style inverted grammar
+- Rotate based on total sessions + day of month
+
+---
+
+## ⚠️ BUILD NUMBER — CRITICAL
+Build numbers exist in **THREE places** and ALL THREE must match:
+1. `app.json` → `expo.ios.buildNumber`
+2. `ios/thirty/Info.plist` → `CFBundleVersion`
+3. `ios/thirty.xcodeproj/project.pbxproj` → `CURRENT_PROJECT_VERSION` (appears twice: Debug + Release)
+
+**Before every EAS build, run:** `./scripts/sync-build-number.sh`
+
+This has caused 3+ rejected uploads. EAS uses the native values, not app.json, when the `ios/` directory exists. If they don't match, Apple rejects as a duplicate.
+
+**When bumping build number:** Change it in `app.json` THEN run the sync script. Never edit native files manually.
+
+---
+
+## Animation Architecture
+
+### BreathCircle (RN Animated API — NOT reanimated)
+- Uses React Native's built-in `Animated` API exclusively
+- Reason: reanimated 4.x worklets failed in TestFlight builds (SDK 55 prebuilt XCFramework issue). Animations were static in every production build while working in simulator.
+- Looped animation runs continuously — does NOT stop/restart on phase changes (that caused the original static-circle bug)
+- Only restarts when: entering/leaving ready state, or breathing pattern changes
+- Final exhale: stops the loop, smoothly animates to zero, transitions purple→golden
+
+### BackgroundOrbs (react-native-reanimated)
+- The ONLY component still using reanimated
+- Uses `useSharedValue` + `withRepeat(withTiming(...), -1, true)` for smooth reversing loop
+- `ReduceMotion.Never` applied per-animation (NOT via wrapper — wrapper crashes in Hermes Release)
+- If reanimated causes issues, this is the one component to watch
+
+---
+
+## IAP Implementation (react-native-iap v14)
+- **Product ID:** `thirty.lifetime.unlock`
+- **Type:** Non-consumable (one-time purchase)
+- Uses `purchaseUpdatedListener` + `purchaseErrorListener` pattern
+- `finishTransaction()` called before unlocking — required by Apple
+- Restore: `getAvailablePurchases()` on app launch + manual restore button
+- v14 API specifics: `fetchProducts` (not `getProducts`), `requestPurchase` with `request: { apple: { sku }, google: { skus } }` format
+- **Past bug:** v6 API calls on v14 library caused sandbox IAP failures → Apple rejection
+
+---
+
+## Audio System
+- `expo-audio` with `createAudioPlayer` (not `expo-av`)
+- Audio mode: `playsInSilentMode: true`, `mixWithOthers`, NO background audio (removed — caused Apple rejection for unused UIBackgroundModes)
+- Ambient sounds loaded as two instances for crossfade looping
+- Rain: 57s loop, Brown: 60s loop, Bowl: 44s loop
+- Crossfade: 4s overlap, volume polling every 200ms
+- Session end: 2s fade-out of ambient + soft chime (0.3 vol, fades over 2s)
+
+---
+
+## Apple App Store Review History
+This app went through **multiple rejections**. Key lessons:
+
+1. **Guideline 2.5.4** — Don't declare `UIBackgroundModes: audio` unless you actually play audio in the background
+2. **Guideline 2.5.1** — HealthKit was declared but not visible enough in UI. After 3 rejections for this, **HealthKit was completely removed** (build 32). Plan to add back in v1.1+ after approval.
+3. **Guideline 2.1(b)** — IAP must work in sandbox. v6 API calls on v14 library = silent failure
+4. **Build number mismatches** — 3+ failed uploads. Always run sync script.
+
+### Current Status (as of build 36, version 1.2)
+- HealthKit: **removed entirely** (no plist declarations, no code)
+- IAP: working with v14 API
+- Background audio: **not declared**
+- Build submitted via EAS Build + EAS Submit
+
+---
+
+## Development Commands
+```bash
+# Install
+npm install
+
+# Run in simulator
+npx expo run:ios
+
+# Start dev server
+npx expo start
+
+# Build for App Store
+./scripts/sync-build-number.sh   # ⚠️ ALWAYS run first
+eas build --platform ios --profile production
+
+# Submit to App Store
+eas submit --platform ios
+```
+
+---
+
+## Related Projects
+- **thirty-website** — Marketing site at `/Users/slm/Projects/thirty-website/`
+  - Plain HTML/CSS + Vite, deployed to Vercel
+  - Pages: landing, healthcare workers niche, privacy, support
+  - GitHub: same repo (`SLMPhatty/thirty-seconds`)
+  - Vercel auto-deploys from `main` branch
+
+---
+
+## Don't
+- Don't add a backend or user accounts
+- Don't change the dark theme or color palette
+- Don't modify the font choices (Instrument Serif / DM Sans)
+- Don't break the 30-second free tier
+- Don't use reanimated for new animations (use RN Animated API)
+- Don't declare HealthKit or background audio in plist (removed for approval)
+- Don't use react-native-iap v6 API calls (we're on v14)
+- Don't edit native iOS files directly for build numbers (use sync script)
+
+---
+
+## Owner
+**Seth Miller** (`sethlouis@gmail.com`, GitHub: `SLMPhatty`)
+Apple Developer Team: `B2MV35NY53`

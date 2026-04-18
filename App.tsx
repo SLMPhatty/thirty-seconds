@@ -15,7 +15,8 @@ import { UnlockScreen } from './src/screens/UnlockScreen';
 import { ReminderScreen, scheduleDailyReminder } from './src/screens/ReminderScreen';
 import { HistoryScreen } from './src/screens/HistoryScreen';
 import { AfterglowScreen } from './src/screens/AfterglowScreen';
-import { recordSession, getPrefs, setPrefs as savePrefs, getStreak, Prefs } from './src/utils/storage';
+import { recordSession, getPrefs, setPrefs as savePrefs, getStreak, getData, Prefs, unlock as unlockStorage } from './src/utils/storage';
+import * as StoreReview from 'expo-store-review';
 import { DEFAULT_BREATH_PATTERN } from './src/data/breathingPatterns';
 import { useStreakProtection } from './src/hooks/useStreakProtection';
 import { updateWidget } from './src/utils/widget';
@@ -97,6 +98,38 @@ export default function App() {
   }, [refreshStreakProtection]);
 
   useEffect(() => {
+    let active = true;
+
+    (async () => {
+      try {
+        const RNIap = require('react-native-iap');
+        await RNIap.initConnection();
+        const purchases = await RNIap.getAvailablePurchases();
+        const hasLifetimeUnlock = purchases.some(
+          (purchase: { productId?: string }) => purchase.productId === 'thirty.lifetime.unlock'
+        );
+
+        if (active && hasLifetimeUnlock) {
+          await unlockStorage();
+        }
+      } catch {
+        // react-native-iap not available (e.g. Expo Go / development)
+      } finally {
+        try {
+          const RNIap = require('react-native-iap');
+          RNIap.endConnection();
+        } catch {
+          // ignore
+        }
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
     if (screen !== 'breath') {
       setBreathPhase('ready');
       setPhaseDuration(3000);
@@ -129,6 +162,18 @@ export default function App() {
       }
     }
     await refreshStreakProtection();
+
+    // Prompt for App Store review after 5th, 10th, and 15th session
+    const d = await getData();
+    if ([5, 10, 15].includes(d.totalSessions)) {
+      try {
+        if (await StoreReview.isAvailableAsync()) {
+          // Small delay so the afterglow screen loads first
+          setTimeout(() => StoreReview.requestReview(), 2000);
+        }
+      } catch {}
+    }
+
     setScreen('afterglow');
   };
 
