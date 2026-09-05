@@ -20,11 +20,18 @@ import {
   AmbientSound,
 } from '../utils/storage';
 import { DEFAULT_BREATH_PATTERN } from '../data/breathingPatterns';
+import {
+  loadActiveChallenges,
+  loadChallengeStatus,
+  type ChallengeStatus,
+} from '../services/challengeSync';
+import { isCloudKitAvailable } from '../services/cloudkit';
 
 interface Props {
   onBegin: (prefs: Prefs) => void;
   onUnlock: () => void;
   onHistory: () => void;
+  onChallenge: () => void;
 }
 
 function getGreeting(): string {
@@ -35,10 +42,10 @@ function getGreeting(): string {
   return 'good night';
 }
 
-export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
+export function StartScreen({ onBegin, onUnlock, onHistory, onChallenge }: Props) {
   const [prefs, setLocalPrefs] = useState<Prefs>({
     ambientSound: 'rain',
-    hideTimer: false,
+    hideTimer: true,
     haptics: true,
     duration: 30,
     breathPattern: DEFAULT_BREATH_PATTERN,
@@ -50,6 +57,7 @@ export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
   const [playable, setPlayable] = useState(true);
   const [freeLeft, setFreeLeft] = useState(3);
   const [practicedToday, setPracticedToday] = useState(true);
+  const [topChallenge, setTopChallenge] = useState<ChallengeStatus | null>(null);
 
   const loadState = useCallback(async () => {
     const [p, s, u, cp, fl, pt] = await Promise.all([
@@ -66,6 +74,20 @@ export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
     setPlayable(cp);
     setFreeLeft(fl);
     setPracticedToday(pt);
+
+    if (isCloudKitAvailable()) {
+      try {
+        const list = await loadActiveChallenges();
+        if (list.length > 0) {
+          const status = await loadChallengeStatus(list[0]);
+          setTopChallenge(status);
+        } else {
+          setTopChallenge(null);
+        }
+      } catch {
+        setTopChallenge(null);
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -114,8 +136,6 @@ export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
     onBegin(prefs);
   };
 
-  const isStreakAtRisk = streak > 0 && !practicedToday && new Date().getHours() >= 18;
-
   return (
     <View style={styles.container}>
       <Text style={styles.greeting}>{getGreeting()}</Text>
@@ -140,7 +160,7 @@ export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
               activeOpacity={0.7}
             >
               <Text style={[styles.soundLabel, prefs.ambientSound === s && styles.soundLabelActive]}>
-                {!unlocked && (s === 'brown' || s === 'bowl') ? '🔒 ' : ''}{s === 'brown' ? 'white noise' : s === 'bowl' ? 'sound bowl' : s}
+                {!unlocked && (s === 'brown' || s === 'bowl') ? '🔒 ' : ''}{s === 'brown' ? 'brown' : s === 'bowl' ? 'bowl' : s}
               </Text>
             </TouchableOpacity>
           ))}
@@ -169,11 +189,29 @@ export function StartScreen({ onBegin, onUnlock, onHistory }: Props) {
         <TouchableOpacity style={styles.streakRow} onPress={onHistory} activeOpacity={0.7}>
           <Text style={styles.streakNum}>{streak}</Text>
           <Text style={styles.streakLabel}> day streak ›</Text>
-          {isStreakAtRisk && (
-            <Text style={styles.streakAtRisk}>  at risk</Text>
-          )}
         </TouchableOpacity>
       )}
+
+      <TouchableOpacity
+        style={styles.challengeRow}
+        onPress={onChallenge}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.challengeEyebrow}>circle</Text>
+        {topChallenge ? (
+          <>
+            <Text style={styles.challengeTitle} numberOfLines={1}>{topChallenge.challenge.name}</Text>
+            <Text style={styles.challengeText} numberOfLines={1}>
+              {new Set(topChallenge.completionsToday.map((c) => c.memberId)).size} sat today ›
+            </Text>
+          </>
+        ) : (
+          <>
+            <Text style={styles.challengeTitle}>meditate with friends</Text>
+            <Text style={styles.challengeText}>create a circle. ›</Text>
+          </>
+        )}
+      </TouchableOpacity>
 
       {!unlocked && (
         <Text style={styles.limitNote}>
@@ -289,6 +327,39 @@ const styles = StyleSheet.create({
     color: colors.warm,
     fontFamily: 'DMSans',
     opacity: 0.8,
+  },
+  challengeRow: {
+    marginTop: 14,
+    paddingVertical: 13,
+    paddingHorizontal: 22,
+    minWidth: 250,
+    maxWidth: 330,
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: colors.accentBorder,
+    backgroundColor: colors.accentSurface,
+    alignItems: 'center',
+  },
+  challengeEyebrow: {
+    fontSize: 10,
+    color: colors.textFaint,
+    fontFamily: 'DMSans',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginBottom: 3,
+  },
+  challengeTitle: {
+    fontSize: 20,
+    color: colors.text,
+    fontFamily: 'InstrumentSerif',
+    textAlign: 'center',
+  },
+  challengeText: {
+    fontSize: 13,
+    color: colors.textDim,
+    fontFamily: 'DMSans',
+    textAlign: 'center',
+    marginTop: 2,
   },
   durationRow: {
     width: 200,

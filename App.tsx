@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, AppState, Linking, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LogBox } from 'react-native';
 import { useFonts } from 'expo-font';
@@ -15,17 +15,55 @@ import { UnlockScreen } from './src/screens/UnlockScreen';
 import { ReminderScreen, scheduleDailyReminder } from './src/screens/ReminderScreen';
 import { HistoryScreen } from './src/screens/HistoryScreen';
 import { AfterglowScreen } from './src/screens/AfterglowScreen';
-import { recordSession, getPrefs, setPrefs as savePrefs, getStreak, getData, Prefs, unlock as unlockStorage } from './src/utils/storage';
+import { ChallengeScreen } from './src/screens/ChallengeScreen';
+import { ChallengeDetail } from './src/screens/ChallengeDetail';
+import { recordSession, getPrefs, setPrefs as savePrefs, getStreak, getData, Prefs, unlock as unlockStorage, isUnlocked as checkUnlocked } from './src/utils/storage';
 import * as StoreReview from 'expo-store-review';
 import { DEFAULT_BREATH_PATTERN } from './src/data/breathingPatterns';
 import { useStreakProtection } from './src/hooks/useStreakProtection';
 import { updateWidget } from './src/utils/widget';
 import { colors } from './src/theme';
+import {
+  recordChallengeCompletions,
+  handleIncomingChallengeEntry,
+  loadActiveChallenges,
+  refreshChallengeNudge,
+  subscribeToAllChallenges,
+  wipeLegacyCirclesOnce,
+} from './src/services/challengeSync';
+import {
+  acceptPendingShare,
+  acceptShare,
+  addCloudKitShareInviteListener,
+  addEntryListener,
+  addMembershipListener,
+  consumePendingAcceptedShare,
+  consumePendingInviteShareURL,
+  getDisplayName,
+  hasPendingShareInvite,
+  isCloudKitAvailable,
+  registerForPushNotifications,
+} from './src/services/cloudkit';
 
 LogBox.ignoreAllLogs();
 SplashScreen.preventAutoHideAsync();
 
-type Screen = 'onboarding' | 'start' | 'breath' | 'afterglow' | 'done' | 'reminder' | 'unlock' | 'history';
+type Screen =
+  | 'onboarding'
+  | 'start'
+  | 'breath'
+  | 'afterglow'
+  | 'done'
+  | 'reminder'
+  | 'unlock'
+  | 'history'
+  | 'challenge'
+  | 'challengeDetail';
+
+interface ChallengeSelection {
+  zoneName: string;
+  ownerName: string;
+}
 
 const REMINDER_HOURS: Record<string, number> = { morning: 8, afternoon: 13, evening: 20 };
 
@@ -36,7 +74,7 @@ export default function App() {
   const [phaseCounter, setPhaseCounter] = useState(0);
   const [prefs, setLocalPrefs] = useState<Prefs>({
     ambientSound: 'rain',
-    hideTimer: false,
+    hideTimer: true,
     haptics: true,
     duration: 30,
     breathPattern: DEFAULT_BREATH_PATTERN,
@@ -45,8 +83,11 @@ export default function App() {
   });
   const [firstSession, setFirstSession] = useState(true);
   const [appReady, setAppReady] = useState(false);
+  const [selectedChallenge, setSelectedChallenge] = useState<ChallengeSelection | null>(null);
   const { refreshStreakProtection } = useStreakProtection();
   const splashHidden = useRef(false);
+  const displayNameRef = useRef<string | null>(null);
+  const pendingInviteUrlRef = useRef<string | null>(null);
 
   const [fontsLoaded, fontError] = useFonts({
     InstrumentSerif: require('./assets/fonts/InstrumentSerif-Regular.ttf'),
@@ -74,6 +115,28 @@ export default function App() {
     try { await SplashScreen.hideAsync(); } catch {}
   }, []);
 
+  const acceptPaidChallengeInvite = useCallback(async (shareURL: string) => {
+    if (!isCloudKitAvailable()) return;
+    // Empty shareURL means accept via stashed CKShare.Metadata (share.url often nil).
+    if (!(await checkUnlocked())) {
+      pendingInviteUrlRef.current = shareURL;
+      Alert.alert(
+        'unlock to join',
+        'group challenges are for paid members. unlock thirty to accept this invite.'
+      );
+      setScreen('unlock');
+      return;
+    }
+    if (shareURL) {
+      await acceptShare(shareURL);
+    } else {
+      await acceptPendingShare();
+    }
+    pendingInviteUrlRef.current = null;
+    setScreen('challenge');
+    refreshChallengeNudge().catch(() => {});
+  }, []);
+
   useEffect(() => {
     if (appReady) hideSplash();
   }, [appReady, hideSplash]);
@@ -82,20 +145,121 @@ export default function App() {
     (async () => {
       const p = await getPrefs();
       setLocalPrefs(p);
-      // Always show onboarding intro on app open
-      setScreen('onboarding');
+      setScreen(p.onboardingSeen ? 'start' : 'onboarding');
       if (p.reminderTime !== 'off') {
         setFirstSession(false);
-        // Re-schedule notification with current streak on each app launch
+        // Re-schedule generic daily reminder on each app launch
         const hour = REMINDER_HOURS[p.reminderTime];
         if (hour) {
-          const streak = await getStreak();
-          scheduleDailyReminder(hour, streak);
+          scheduleDailyReminder(hour);
         }
       }
       await refreshStreakProtection();
+
+      if (isCloudKitAvailable()) {
+        try {
+          await registerForPushNotifications();
+          displayNameRef.current = await getDisplayName();
+          await wipeLegacyCirclesOnce();
+          const acceptedShare = await consumePendingAcceptedShare();
+          if (acceptedShare) {
+            setScreen('challenge');
+          }
+          const pendingInviteShareURL = await consumePendingInviteShareURL();
+          const hasPendingInvite = await hasPendingShareInvite();
+          if (pendingInviteShareURL) {
+            acceptPaidChallengeInvite(pendingInviteShareURL).catch(() => {
+              Alert.alert('could not join', 'try opening the invite again');
+            });
+          } else if (hasPendingInvite) {
+            acceptPaidChallengeInvite('').catch(() => {
+              Alert.alert('could not join', 'try opening the invite again');
+            });
+          }
+          const challenges = await loadActiveChallenges();
+          subscribeToAllChallenges(challenges).catch(() => {});
+          refreshChallengeNudge().catch(() => {});
+        } catch {
+          // CloudKit unavailable (no iCloud account, etc.) — feature degrades silently
+        }
+      }
     })();
-  }, [refreshStreakProtection]);
+  }, [refreshStreakProtection, acceptPaidChallengeInvite]);
+
+  // CloudKit entry events → fire local notification (Yoda copy in challengeSync)
+  useEffect(() => {
+    const remove = addEntryListener(({ zoneName, ownerName }) => {
+      if (zoneName && ownerName) {
+        handleIncomingChallengeEntry(zoneName, ownerName).catch(() => {});
+      } else {
+        // Unknown payload shape — sweep all active challenges
+        loadActiveChallenges()
+          .then((cs) =>
+            cs.forEach((c) =>
+              handleIncomingChallengeEntry(c.zoneName, c.ownerName).catch(() => {})
+            )
+          )
+          .catch(() => {});
+      }
+    });
+    return remove;
+  }, []);
+
+  // Refresh on foreground so we catch entries that landed while closed
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', async (state) => {
+      if (state !== 'active' || !isCloudKitAvailable()) return;
+      try {
+        const challenges = await loadActiveChallenges();
+        for (const c of challenges) {
+          handleIncomingChallengeEntry(c.zoneName, c.ownerName).catch(() => {});
+        }
+      } catch {
+        // ignore
+      }
+    });
+    return () => sub.remove();
+  }, []);
+
+  // Gate CloudKit share acceptance behind the lifetime unlock. The native
+  // AppDelegate opens the app from the Apple share link, but intentionally does
+  // not call CKAcceptSharesOperation until JS confirms the purchase state.
+  useEffect(() => {
+    const remove = addCloudKitShareInviteListener(({ shareURL }) => {
+      // Fire even when shareURL is missing — metadata was stashed natively.
+      acceptPaidChallengeInvite(shareURL ?? '').catch(() => {
+        Alert.alert('could not join', 'try opening the invite again');
+      });
+    });
+    return remove;
+  }, [acceptPaidChallengeInvite]);
+
+  // System CloudKit sharing accepts do not arrive as normal Linking URLs.
+  // iOS calls AppDelegate.userDidAcceptCloudKitShareWith; the native module
+  // accepts the share and emits this event so the app can show the challenge list.
+  useEffect(() => {
+    const remove = addMembershipListener(() => {
+      setScreen('challenge');
+      refreshChallengeNudge().catch(() => {});
+    });
+    return remove;
+  }, []);
+
+  // Handle CloudKit share URLs (universal links)
+  useEffect(() => {
+    const handleUrl = async (url: string | null) => {
+      if (!url || !isCloudKitAvailable()) return;
+      if (!url.includes('icloud.com/share')) return;
+      try {
+        await acceptPaidChallengeInvite(url);
+      } catch {
+        Alert.alert('could not join', 'try opening the invite again');
+      }
+    };
+    Linking.getInitialURL().then(handleUrl);
+    const sub = Linking.addEventListener('url', (e) => handleUrl(e.url));
+    return () => sub.remove();
+  }, [acceptPaidChallengeInvite]);
 
   useEffect(() => {
     let active = true;
@@ -111,6 +275,23 @@ export default function App() {
 
         if (active && hasLifetimeUnlock) {
           await unlockStorage();
+          // Silent restore can finish after cold-start invite handling ran while locked.
+          // Re-check pending invite so join proceeds without visiting UnlockScreen.
+          if (isCloudKitAvailable()) {
+            try {
+              let pendingUrl = pendingInviteUrlRef.current;
+              if (pendingUrl === null || pendingUrl.length === 0) {
+                const stored = await consumePendingInviteShareURL();
+                if (stored && stored.length > 0) pendingUrl = stored;
+              }
+              const hasPendingInvite = await hasPendingShareInvite();
+              if (pendingUrl !== null || hasPendingInvite) {
+                await acceptPaidChallengeInvite(pendingUrl ?? '');
+              }
+            } catch {
+              // Invite accept can retry when user opens Circles / re-taps link.
+            }
+          }
         }
       } catch {
         // react-native-iap not available (e.g. Expo Go / development)
@@ -127,7 +308,7 @@ export default function App() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [acceptPaidChallengeInvite]);
 
   useEffect(() => {
     if (screen !== 'breath') {
@@ -158,10 +339,18 @@ export default function App() {
     if (prefs.reminderTime !== 'off') {
       const hour = REMINDER_HOURS[prefs.reminderTime];
       if (hour) {
-        await scheduleDailyReminder(hour, streak);
+        await scheduleDailyReminder(hour);
       }
     }
     await refreshStreakProtection();
+
+    if (isCloudKitAvailable()) {
+      const name = displayNameRef.current || (await getDisplayName());
+      if (name && name.trim().length > 0) {
+        recordChallengeCompletions(name).catch(() => {});
+      }
+      refreshChallengeNudge().catch(() => {});
+    }
 
     // Prompt for App Store review after 5th, 10th, and 15th session
     const d = await getData();
@@ -181,7 +370,35 @@ export default function App() {
     setScreen('start');
   };
 
-  const handleUnlocked = () => {
+  const handleUnlocked = async () => {
+    // After IAP unlock/restore, always attempt pending Circle accept — not only when
+    // pendingInviteUrlRef is set. Process death can clear the ref while native archive
+    // / flag / URL still indicate a pending invite.
+    try {
+      // null = no JS-known pending; '' = metadata-only pending (share.url was nil).
+      let url: string | null = pendingInviteUrlRef.current;
+      let hasPendingInvite = false;
+      if (isCloudKitAvailable()) {
+        // Prefer a concrete URL for acceptShare; otherwise acceptPendingShare uses archive.
+        if (url === null || url.length === 0) {
+          const stored = await consumePendingInviteShareURL();
+          if (stored && stored.length > 0) {
+            url = stored;
+          }
+        }
+        hasPendingInvite = await hasPendingShareInvite();
+      }
+
+      const shouldAccept = url !== null || hasPendingInvite;
+      if (shouldAccept) {
+        await acceptPaidChallengeInvite(url ?? '');
+        return;
+      }
+    } catch {
+      Alert.alert('could not join', 'try opening the invite again');
+      setScreen('start');
+      return;
+    }
     setScreen('start');
   };
 
@@ -199,6 +416,30 @@ export default function App() {
           onBegin={handleBegin}
           onUnlock={() => setScreen('unlock')}
           onHistory={() => setScreen('history')}
+          onChallenge={() => setScreen('challenge')}
+        />
+      )}
+      {screen === 'challenge' && (
+        <ChallengeScreen
+          onBack={() => setScreen('start')}
+          onOpenChallenge={(zoneName, ownerName) => {
+            setSelectedChallenge({ zoneName, ownerName });
+            setScreen('challengeDetail');
+          }}
+        />
+      )}
+      {screen === 'challengeDetail' && selectedChallenge && (
+        <ChallengeDetail
+          zoneName={selectedChallenge.zoneName}
+          ownerName={selectedChallenge.ownerName}
+          onBack={() => {
+            setSelectedChallenge(null);
+            setScreen('challenge');
+          }}
+          onLeft={() => {
+            setSelectedChallenge(null);
+            setScreen('challenge');
+          }}
         />
       )}
       {screen === 'breath' && (
@@ -222,6 +463,7 @@ export default function App() {
         <DoneScreen
           duration={prefs.duration}
           onAgain={handleAgain}
+          onChallenge={() => setScreen('challenge')}
           onUnlock={() => setScreen('unlock')}
         />
       )}

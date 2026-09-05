@@ -29,9 +29,9 @@ export function UnlockScreen({ onBack, onUnlocked }: Props) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>you showed up today</Text>
+      <Text style={styles.title}>thirty</Text>
       <Text style={styles.subtitle}>
-        unlock unlimited sessions for every moment you need a breath
+        unlimited sits. circle included. one time.
       </Text>
 
       {purchasing ? (

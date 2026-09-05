@@ -1,6 +1,8 @@
 internal import Expo
 import React
 import ReactAppDependencyProvider
+import CloudKit
+internal import ThirtyCloudKit
 
 @main
 class AppDelegate: ExpoAppDelegate {
@@ -29,6 +31,33 @@ class AppDelegate: ExpoAppDelegate {
 #endif
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+
+  // thirty-cloudkit:silent-push-handler
+  public override func application(
+    _ application: UIApplication,
+    didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+    fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
+  ) {
+    if userInfo["ck"] != nil || userInfo["aps"] is [String: Any] {
+      NotificationCenter.default.post(
+        name: Notification.Name("ThirtyCloudKitSilentPush"),
+        object: nil,
+        userInfo: userInfo
+      )
+    }
+    completionHandler(.newData)
+  }
+
+  // thirty-cloudkit:share-accept-handler
+  public func application(
+    _ application: UIApplication,
+    userDidAcceptCloudKitShareWith cloudKitShareMetadata: CKShare.Metadata
+  ) {
+    // Never early-return on missing share.url — it is often nil here.
+    // Stash full metadata; JS unlocks then calls acceptPendingShare / acceptShare.
+    ThirtyCloudKitShareBridge.stashPendingInvite(cloudKitShareMetadata)
   }
 
   // Linking API

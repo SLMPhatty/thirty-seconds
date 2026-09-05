@@ -34,14 +34,9 @@ export function DurationPicker({ selected, unlocked, onSelect }: Props) {
                 30s
               </Text>
             ) : (
-              <View style={styles.labelWrap}>
-                <Text style={[styles.label, isActive && styles.labelActive]}>
-                  1m{isLocked ? ' \u{1F512}' : ''}
-                </Text>
-                <Text style={[styles.sublabel, isActive && styles.sublabelActive]}>
-                  overachiever
-                </Text>
-              </View>
+              <Text style={[styles.label, isActive && styles.labelActive]}>
+                1 min{isLocked ? ' \u{1F512}' : ''}
+              </Text>
             )}
           </TouchableOpacity>
         );

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { colors } from '../theme';
-import { getPrefs, setPrefs, getStreak } from '../utils/storage';
+import { getPrefs, setPrefs } from '../utils/storage';
 
 interface Props {
   onDone: () => void;
@@ -26,21 +26,17 @@ async function cancelNotificationsByKind(kind: string) {
   );
 }
 
-export async function scheduleDailyReminder(hour: number, streak?: number) {
+export async function scheduleDailyReminder(hour: number) {
   await cancelNotificationsByKind(DAILY_REMINDER_KIND);
   if (hour < 0) return;
 
   const { status } = await Notifications.requestPermissionsAsync();
   if (status !== 'granted') return;
 
-  const body = streak && streak > 0
-    ? `Don\u2019t break your ${streak}-day streak \u2014 30 seconds is all it takes`
-    : 'Start your streak \u2014 just 30 seconds';
-
   await Notifications.scheduleNotificationAsync({
     content: {
       title: 'thirty',
-      body,
+      body: 'Take 30 quiet seconds — your day can make room for this',
       sound: true,
       data: { kind: DAILY_REMINDER_KIND },
     },
@@ -57,8 +53,7 @@ export function ReminderScreen({ onDone }: Props) {
 
   const handleSelect = async (label: string, hour: number) => {
     setSelected(label);
-    const streak = await getStreak();
-    await scheduleDailyReminder(hour, streak);
+    await scheduleDailyReminder(hour);
     const prefs = await getPrefs();
     await setPrefs({ ...prefs, reminderTime: (hour < 0 ? 'off' : label) as any });
     setTimeout(onDone, 400);

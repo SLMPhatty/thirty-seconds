@@ -44,7 +44,7 @@ const defaultData: AppData = {
 
 const defaultPrefs: Prefs = {
   ambientSound: 'rain',
-  hideTimer: false,
+  hideTimer: true,
   haptics: true,
   duration: 30,
   breathPattern: DEFAULT_BREATH_PATTERN,
@@ -143,15 +143,15 @@ export const MILESTONES = [1, 3, 7, 14, 30, 60, 90, 180, 365];
 
 export function getMilestoneMessage(streak: number): string | null {
   const messages: Record<number, string> = {
-    1: 'begun, your journey has',
-    3: 'three days. everyone starts somewhere',
-    7: 'one week. look at you, forming habits',
-    14: 'two weeks. the ritual is taking hold',
-    30: 'one month down. this is becoming a thing.',
-    60: 'sixty days — this is who you are now',
-    90: 'ninety days of returning to yourself',
-    180: 'six months. we are not crying, you are crying',
-    365: 'one year. you actually changed your life',
+    1: 'one day.',
+    3: 'three days.',
+    7: 'a week.',
+    14: 'two weeks.',
+    30: 'a month.',
+    60: 'sixty days.',
+    90: 'ninety days.',
+    180: 'six months.',
+    365: 'a year.',
   };
   return messages[streak] || null;
 }

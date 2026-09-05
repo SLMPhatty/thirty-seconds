@@ -10,8 +10,10 @@ BUILD_NUM=$(node -e "console.log(JSON.parse(require('fs').readFileSync('app.json
 
 echo "Syncing build number: $BUILD_NUM"
 
-# Update Info.plist
-sed -i '' "s|<key>CFBundleVersion</key>.*<string>[^<]*</string>|<key>CFBundleVersion</key>\n\t<string>${BUILD_NUM}</string>|" ios/thirty/Info.plist
+# Update Info.plist (CFBundleVersion key and value are on separate lines)
+# We rewrite the <string> line that immediately follows the CFBundleVersion key.
+# Using PlistBuddy avoids brittle multi-line sed.
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${BUILD_NUM}" ios/thirty/Info.plist
 
 # Update project.pbxproj (both Debug and Release)
 sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9]*/CURRENT_PROJECT_VERSION = ${BUILD_NUM}/g" ios/thirty.xcodeproj/project.pbxproj

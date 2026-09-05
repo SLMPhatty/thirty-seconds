@@ -1,9 +1,29 @@
 import { useCallback } from 'react';
 import * as Notifications from 'expo-notifications';
-import { getStreak, hasPracticedToday } from '../utils/storage';
+import { getData } from '../utils/storage';
 
 const STREAK_PROTECTION_KIND = 'streak-protection';
 const STREAK_PROTECTION_HOUR = 18;
+
+function dateKey(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function today(): string {
+  return dateKey(new Date());
+}
+
+function yesterday(): string {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return dateKey(d);
+}
+
+function nextStreakProtectionDate(): Date | null {
+  const triggerDate = new Date();
+  triggerDate.setHours(STREAK_PROTECTION_HOUR, 0, 0, 0);
+  return triggerDate.getTime() > Date.now() ? triggerDate : null;
+}
 
 async function cancelStreakProtectionNotification() {
   const scheduled = await Notifications.getAllScheduledNotificationsAsync();
@@ -17,14 +37,16 @@ async function cancelStreakProtectionNotification() {
 export async function refreshStreakProtectionNotification(): Promise<void> {
   await cancelStreakProtectionNotification();
 
-  const [streak, practicedToday] = await Promise.all([
-    getStreak(),
-    hasPracticedToday(),
-  ]);
+  const data = await getData();
+  const practicedToday = data.lastDate === today();
+  const hasActiveStreakToProtect = data.streak > 0 && data.lastDate === yesterday();
 
-  if (streak <= 0 || practicedToday) {
+  if (!hasActiveStreakToProtect || practicedToday) {
     return;
   }
+
+  const triggerDate = nextStreakProtectionDate();
+  if (!triggerDate) return;
 
   const { status } = await Notifications.requestPermissionsAsync();
   if (status !== 'granted') {
@@ -34,14 +56,13 @@ export async function refreshStreakProtectionNotification(): Promise<void> {
   await Notifications.scheduleNotificationAsync({
     content: {
       title: 'thirty',
-      body: `Dont break your ${streak}-day streak 🔥`,
+      body: `Don’t break your ${data.streak}-day streak 🔥`,
       sound: true,
       data: { kind: STREAK_PROTECTION_KIND },
     },
     trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.DAILY,
-      hour: STREAK_PROTECTION_HOUR,
-      minute: 0,
+      type: Notifications.SchedulableTriggerInputTypes.DATE,
+      date: triggerDate,
     },
   });
 }

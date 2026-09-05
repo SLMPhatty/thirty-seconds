@@ -8,12 +8,12 @@ interface Props {
 
 const slides = [
   {
-    title: 'the shortest meditation\nin the galaxy, this is',
+    title: 'thirty seconds\nof stillness',
     subtitle: '',
   },
   {
-    title: 'breathe.\nthirty seconds.\nthat\'s all.',
-    subtitle: 'tap to begin your practice',
+    title: 'one breath.\nthat\'s all.',
+    subtitle: 'tap to begin',
   },
 ];
 

@@ -2,32 +2,45 @@
   "expo": {
     "name": "thirty",
     "slug": "thirty",
-    "version": "1.2",
+    "version": "2.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0a0a12"
+      "backgroundColor": "#0E0D0C"
     },
     "ios": {
       "supportsTablet": false,
-      "buildNumber": "36",
+      "buildNumber": "52",
       "bundleIdentifier": "com.thirty.app",
       "appleTeamId": "B2MV35NY53",
       "entitlements": {
         "com.apple.security.application-groups": [
           "group.com.thirty.app"
-        ]
+        ],
+        "com.apple.developer.icloud-services": [
+          "CloudKit"
+        ],
+        "com.apple.developer.icloud-container-identifiers": [
+          "iCloud.com.thirty.app"
+        ],
+        "com.apple.developer.icloud-container-environment": "Production",
+        "aps-environment": "production"
       },
+      "usesAppleSignIn": false,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CKSharingSupported": true,
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
       }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#0a0a12",
+        "backgroundColor": "#0E0D0C",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -36,7 +49,9 @@
     },
     "plugins": [
       "react-native-iap",
-      "expo-audio"
+      "expo-audio",
+      "expo-asset",
+      "./plugins/withCloudKitPushHandler.js"
     ],
     "extra": {
       "eas": {

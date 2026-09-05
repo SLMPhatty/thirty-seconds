@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
 import { setAudioModeAsync, type AudioPlayer } from 'expo-audio';
-import * as Haptics from 'expo-haptics';
+import { useBreathHaptics } from '../hooks/useBreathHaptics';
 import { BreathCircle, BreathPhase } from '../components/BreathCircle';
 import { useAudio } from '../hooks/useAudio';
 import { Prefs, setPrefs } from '../utils/storage';
@@ -189,10 +189,7 @@ export function BreathScreen({ prefs, onFinish, onVisualStateChange }: Props) {
     });
   }, [PHASES, phaseIndex, awaitingFinalExhale, completeSession, currentPhase.phase]);
 
-  useEffect(() => {
-    if (!ready || !prefs.haptics || currentPhase.phase !== 'in') return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  }, [currentPhase.phase, phaseIndex, prefs.haptics, ready]);
+  useBreathHaptics(prefs.haptics, ready, currentPhase.phase, currentPhase.duration);
 
   // Phase cycling — only when ready
   useEffect(() => {

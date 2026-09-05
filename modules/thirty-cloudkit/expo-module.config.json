@@ -1,0 +1,7 @@
+{
+  "platforms": ["apple"],
+  "apple": {
+    "modules": ["ThirtyCloudKitModule"],
+    "podspecPath": "ThirtyCloudKit.podspec"
+  }
+}

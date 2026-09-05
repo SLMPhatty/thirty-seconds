@@ -8,15 +8,12 @@ import { getData, isUnlocked as checkUnlocked, getMilestoneMessage, getFreeSessi
 interface Props {
   duration: number;
   onAgain: () => void;
+  onChallenge: () => void;
   onUnlock: () => void;
 }
 
 async function celebrationHaptic() {
-  await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-  await new Promise((r) => setTimeout(r, 80));
-  await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-  await new Promise((r) => setTimeout(r, 110));
-  await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+  await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
 }
 
 function MilestoneFadeIn({ delay, children }: { delay: number; children: React.ReactNode }) {
@@ -35,7 +32,7 @@ function MilestoneFadeIn({ delay, children }: { delay: number; children: React.R
   return <Animated.View style={{ opacity }}>{children}</Animated.View>;
 }
 
-export function DoneScreen({ duration, onAgain, onUnlock }: Props) {
+export function DoneScreen({ duration, onAgain, onChallenge, onUnlock }: Props) {
   const [quote, setQuote] = useState('');
   const [streak, setStreak] = useState(0);
   const [unlocked, setUnlocked] = useState(false);
@@ -62,14 +59,14 @@ export function DoneScreen({ duration, onAgain, onUnlock }: Props) {
   const handleShare = async () => {
     const msg = milestone
       ? `${streak} days of stillness. ${milestone} #thirty`
-      : `meditated for 30 seconds, I just did. #thirty`;
+      : `${streak} days of stillness. #thirty`;
     await Share.share({ message: msg });
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.doneWord}>you are powerful.</Text>
-      <Text style={styles.quote}>go be great.</Text>
+      <Text style={styles.doneWord}>still.</Text>
+      <Text style={styles.quote}>{quote}</Text>
 
       <View style={styles.streakWrap}>
         <Text style={[styles.streakNum, milestone && styles.streakNumMilestone]}>{streak}</Text>
@@ -86,6 +83,11 @@ export function DoneScreen({ duration, onAgain, onUnlock }: Props) {
           <Text style={styles.streakLabel}>day streak</Text>
         )}
       </View>
+
+      <TouchableOpacity style={styles.challengeBtn} onPress={onChallenge} activeOpacity={0.72}>
+        <Text style={styles.challengeEyebrow}>circle</Text>
+        <Text style={styles.challengeText}>meditate with friends</Text>
+      </TouchableOpacity>
 
       <View style={styles.actions}>
         <TouchableOpacity style={styles.againBtn} onPress={onAgain} activeOpacity={0.7}>
@@ -177,6 +179,31 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     gap: 12,
+  },
+  challengeBtn: {
+    width: '100%',
+    maxWidth: 320,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 28,
+    borderWidth: 1.5,
+    borderColor: colors.accentBorder,
+    backgroundColor: colors.accentSurface,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  challengeEyebrow: {
+    fontFamily: 'DMSans',
+    fontSize: 11,
+    color: colors.textFaint,
+    letterSpacing: 1.1,
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  challengeText: {
+    fontFamily: 'InstrumentSerif',
+    fontSize: 24,
+    color: colors.text,
   },
   againBtn: {
     paddingVertical: 12,
